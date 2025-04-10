@@ -1,0 +1,622 @@
+{
+  "summary": {
+    "averageTariff": 20.5,
+    "highestTariff": {
+      "country": "中国 (对美)",
+      "rate": 84
+    },
+    "responseCountries": 15,
+    "changeVs2023": 17.1,
+    "totalTradePartners": 20
+  },
+  "trends": {
+      "counterTariffs": 94,
+      "nonTariffBarriers": 68,
+      "exportRestrictions": 42,
+      "internationalLitigation": 38,
+      "regionalChanges": {
+          "asia": 14.5,
+          "europe": 11.2,
+          "americas": 7.5,
+          "others": 5.6
+      }
+  },
+  "timeline": [
+    {
+        "date": "2024-04-17",
+        "title": "美国对华加征新关税",
+        "description": "美国总统拜登宣布对价值180亿美元的中国进口商品加征关税。",
+        "details": "涉及电动汽车、电池、太阳能电池、钢铁铝材等。"
+    },
+    {
+        "date": "2024-05-22",
+        "title": "美国扩大关税范围",
+        "description": "美国宣布对加拿大、墨西哥商品加征25%关税，并增加对中国商品的额外关税。",
+        "details": "全球贸易紧张局势升级。"
+    },
+    {
+        "date": "2024-06-15",
+        "title": "美国启动301调查关税",
+        "description": "美国贸易代表办公室宣布对中国部分商品实施\"301调查\"关税。",
+        "details": "预计2025年第二季度生效。"
+    },
+    {
+        "date": "2025-01-20",
+        "title": "美国威胁对墨西哥加税",
+        "description": "特朗普政府威胁对墨西哥商品征收25%关税。",
+        "details": "与非法移民问题挂钩，墨西哥表示将反制。"
+    },
+    {
+        "date": "2025-02-15",
+        "title": "美国宣布\"基准关税\"计划",
+        "description": "美国宣布对所有贸易伙伴加征10%普遍基准关税，并对中国等实施差异化关税(34%)。",
+        "details": "计划于4月生效，引发广泛担忧。"
+    },
+    {
+        "date": "2025-04-05",
+        "title": "美国实施10%基准关税",
+        "description": "美国正式开始对所有进口商品加征10%的基准关税。",
+        "details": "部分国家已准备或开始实施反制。"
+    },
+     {
+        "date": "2025-04-09",
+        "title": "中美关税战急剧升级",
+        "description": "美国宣布将对中国输美商品的关税从34%提高至84%。",
+        "details": "于4月10日生效。"
+    },
+    {
+        "date": "2025-04-10",
+        "title": "中国对美实施对等反制",
+        "description": "中国宣布对所有原产于美国的进口商品，在现行税率基础上加征84%的关税。",
+        "details": "作为对美方关税升级的回应，同日生效。"
+    },
+    {
+        "date": "2025-04-15",
+        "title": "欧盟对美启动首轮反制",
+        "description": "欧盟开始对价值260亿欧元的美国商品加征关税的第一阶段。",
+        "details": "第二阶段计划于5月15日开始。"
+    }
+  ],
+  "countries": [
+  {
+    "name": "中国",
+    "code": "CN",
+    "code3": "CHN",
+    "region": "亚洲",
+    "tariffRate": 84,
+    "details": "对美加征84%关税作为反制 (2025-04-10)。此前美国已多次对华加征关税。",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": 84,
+    "highestCategory": "全品类 (对美反制)",
+    "tradeResponseMeasures": 2,
+    "yearData": [],
+    "tradePartners": ["美国", "欧盟", "日本", "韩国", "澳大利亚"],
+    "usTariffHistory": [
+      {
+        "date": "2024-09-13 (宣布)", 
+        "description": "基于301条款，宣布对部分商品加征关税",
+        "details": "钢铁/铝材(25%), 电动汽车, 锂电池, 太阳能电池(50%)等",
+        "effectiveDate": "2024-09-27"
+      },
+      {
+        "date": "2024-12-11 (宣布)",
+        "description": "对部分半导体和太阳能产品加征关税",
+        "details": "硅太阳能片、多晶硅、部分半导体产品加征至50%",
+        "effectiveDate": "待确认 (或已包含在9月措施中)"
+      },
+       {
+        "date": "2025-02-01 (宣布)",
+        "description": "特朗普政府对中国商品普遍加征10%关税",
+        "details": "影响范围广泛",
+        "effectiveDate": "待确认" 
+      },
+      {
+        "date": "2025-03-03 (宣布)",
+        "description": "特朗普政府将对华普遍关税提高至20%",
+        "details": "在10%基础上再加10%",
+         "effectiveDate": "待确认"
+      },
+       {
+        "date": "2025-04-05 (宣布)",
+        "description": "美国实施10%基准关税，并对中国商品税率提升至34%",
+        "details": "结合\"公平互惠计划\"，作为普遍关税+国别税率调整的一部分 (与timeline信息整合)",
+        "effectiveDate": "2025-04-05 (基准关税)" 
+      },
+       {
+        "date": "2025-04-09 (宣布)",
+        "description": "美国将对中国输美商品关税从34%提高至84%",
+        "details": "急剧升级 (与timeline信息整合)",
+        "effectiveDate": "2025-04-10"
+      }
+    ],
+    "response": [
+      {
+        "type": "关税反制",
+        "details": "对原产于美国的所有进口商品，在现行税率基础上加征84%的关税",
+        "effectiveDate": "2025-04-10",
+        "targetedSectors": ["全品类"],
+        "value": null,
+        "note": "作为对美方关税升级至84%的直接回应"
+      },
+      {
+        "type": "非关税壁垒",
+        "details": "可能增加美国商品的检验检疫要求 (待确认)",
+        "effectiveDate": null,
+        "targetedSectors": null,
+         "value": null
+      }
+    ],
+    "longitude": 104.1954,
+    "latitude": 35.8617,
+    "isMajor": true,
+    "impact": "中美贸易摩擦显著升级，影响全球供应链。关税税率通过多次调整达到当前高位。"
+  },
+  {
+    "name": "美国",
+    "code": "US",
+    "code3": "USA",
+    "region": "北美洲",
+    "tariffRate": 10,
+    "details": "对所有进口商品加征10%基准关税，对中国商品加征至84%",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": 84,
+    "highestCategory": "输美商品 (中国)",
+    "tradeResponseMeasures": 0,
+    "yearData": [],
+    "tradePartners": ["中国", "加拿大", "墨西哥", "日本", "德国"],
+    "response": [],
+    "longitude": -95.7129,
+    "latitude": 37.0902,
+    "isMajor": true,
+     "impact": "引发全球贸易伙伴广泛反制。"
+  },
+  {
+    "name": "欧盟",
+    "code": "EU",
+    "code3": "EUR",
+    "region": "欧洲",
+    "tariffRate": 15,
+    "details": "计划对美加征报复性关税",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 2,
+    "yearData": [],
+    "tradePartners": ["美国", "中国", "俄罗斯", "土耳其", "英国"],
+    "response": [
+      {
+        "type": "关税反制",
+        "details": "对价值260亿欧元的美国商品加征关税 (分阶段)",
+        "effectiveDate": "2025-04-15 (阶段1)",
+        "targetedSectors": ["多种商品"],
+        "value": "260亿欧元"
+      },
+       {
+        "type": "政策工具",
+        "details": "考虑征收数字服务税，启动《反胁迫工具法》",
+        "effectiveDate": null,
+        "targetedSectors": ["数字服务"],
+        "value": null
+      }
+    ],
+    "longitude": 9.1,
+    "latitude": 48.5,
+    "isMajor": true,
+    "impact": "美欧贸易关系紧张，可能影响跨大西洋贸易。"
+  },
+  {
+    "name": "日本",
+    "code": "JP",
+    "code3": "JPN",
+    "region": "亚洲",
+    "tariffRate": 4.0,
+    "details": "暂未加征关税，参与经济对话",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": "大米",
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "美国", "澳大利亚", "韩国", "泰国"],
+    "response": [
+       {
+        "type": "外交/对话",
+        "details": "与欧盟、韩国重启经济对话以应对美国政策",
+        "effectiveDate": null,
+        "targetedSectors": null,
+        "value": null
+      }
+    ],
+    "longitude": 138.2529,
+    "latitude": 36.2048,
+    "isMajor": true,
+     "impact": "寻求通过外交途径解决，避免贸易战升级。"
+  },
+  {
+    "name": "加拿大",
+    "code": "CA",
+    "code3": "CAN",
+    "region": "北美洲",
+    "tariffRate": 25,
+     "details": "对美钢铁等商品加征25%关税",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": 25,
+    "highestCategory": "钢铁等 (对美)",
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["美国", "中国", "墨西哥", "英国", "日本"],
+    "response": [
+       {
+        "type": "关税反制",
+        "details": "对价值298亿加元的美国原产钢铁及其他商品加征25%的关税",
+        "effectiveDate": "待确认",
+        "targetedSectors": ["钢铁", "其他商品"],
+        "value": "298亿加元"
+      }
+    ],
+    "longitude": -106.3468,
+    "latitude": 56.1304,
+    "isMajor": true,
+    "impact": "主要贸易伙伴间关税升级，影响北美自由贸易区。"
+  },
+  {
+    "name": "墨西哥",
+    "code": "MX",
+    "code3": "MEX",
+    "region": "北美洲",
+    "tariffRate": 7.5,
+    "details": "参与对话，具体反制措施不明",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 0,
+    "yearData": [],
+    "tradePartners": ["美国", "中国", "加拿大", "德国", "日本"],
+    "response": [
+       {
+        "type": "外交/对话",
+        "details": "参与经济对话以应对美国政策",
+        "effectiveDate": null,
+        "targetedSectors": null,
+         "value": null
+      }
+    ],
+    "longitude": -102.5528,
+    "latitude": 23.6345,
+    "isMajor": true,
+    "impact": "依赖与美贸易，受关税政策影响较大，寻求外交解决。"
+  },
+  {
+    "name": "印度",
+    "code": "IN",
+    "code3": "IND",
+    "region": "亚洲",
+    "tariffRate": 17.1,
+    "details": "参与对话，具体反制措施不明",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": "酒精饮料",
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "美国", "阿联酋", "沙特阿拉伯", "伊拉克"],
+    "response": [
+      {
+        "type": "外交/对话",
+        "details": "参与经济对话以应对美国政策",
+        "effectiveDate": null,
+        "targetedSectors": null,
+        "value": null
+      }
+    ],
+    "longitude": 78.9629,
+    "latitude": 20.5937,
+    "isMajor": true,
+     "impact": "在寻求外交解决方案，同时可能评估贸易影响。"
+  },
+  {
+    "name": "越南",
+    "code": "VN",
+    "code3": "VNM",
+    "region": "亚洲",
+    "tariffRate": 0,
+    "details": "宣布对美关税降至零，要求对等",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "美国", "韩国", "日本", "欧盟"],
+    "response": [
+      {
+        "type": "关税调整",
+        "details": "率先宣布对美国关税降至零，并要求美国采取同等措施",
+        "effectiveDate": "待确认",
+        "targetedSectors": ["全品类"],
+         "value": null
+      }
+    ],
+    "longitude": 108.2772,
+    "latitude": 14.0583,
+    "isMajor": false,
+    "impact": "采取独特策略试图缓和贸易紧张。"
+  },
+  {
+    "name": "韩国",
+    "code": "KR",
+    "code3": "KOR",
+    "region": "亚洲",
+    "tariffRate": 13.9,
+    "details": "实施反倾销税，参与经济对话",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": "大米",
+    "tradeResponseMeasures": 2,
+    "yearData": [],
+    "tradePartners": ["中国", "美国", "日本", "德国", "澳大利亚"],
+    "response": [
+      {
+        "type": "反倾销税",
+        "details": "对美国部分商品实施反倾销税",
+        "effectiveDate": "待确认",
+        "targetedSectors": ["待确认"],
+        "value": null
+      },
+       {
+        "type": "外交/对话",
+        "details": "与欧盟、日本重启经济对话以应对美国政策",
+        "effectiveDate": null,
+        "targetedSectors": null,
+        "value": null
+      }
+    ],
+    "longitude": 127.7669,
+    "latitude": 35.9078,
+    "isMajor": true,
+    "impact": "采取混合策略应对，包括贸易救济和外交途径。"
+  },
+   {
+    "name": "英国",
+    "code": "GB",
+    "code3": "GBR",
+    "region": "欧洲",
+    "tariffRate": 5.0,
+    "details": "启动对美报复性关税的咨询",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["欧盟", "美国", "中国", "瑞士", "加拿大"],
+    "response": [
+       {
+        "type": "政策咨询",
+        "details": "启动了对美报复性关税的咨询程序",
+        "effectiveDate": null,
+        "targetedSectors": null,
+         "value": null
+      }
+    ],
+    "longitude": -3.4360,
+    "latitude": 55.3781,
+    "isMajor": true,
+    "impact": "正在评估并准备可能的反制措施。"
+  },
+   {
+    "name": "澳大利亚",
+    "code": "AU",
+    "code3": "AUS",
+    "region": "大洋洲",
+    "tariffRate": 2.5,
+    "details": "参与对话，具体反制措施不明",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "日本", "美国", "韩国", "英国"],
+    "response": [
+       {
+        "type": "外交/对话",
+        "details": "参与经济对话以应对美国政策",
+        "effectiveDate": null,
+        "targetedSectors": null,
+         "value": null
+      }
+    ],
+    "longitude": 133.7751,
+    "latitude": -25.2744,
+    "isMajor": true,
+    "impact": "主要依赖外交途径处理贸易争端。"
+  },
+  {
+    "name": "巴西",
+    "code": "BR",
+    "code3": "BRA",
+    "region": "南美洲",
+    "tariffRate": 13.4,
+    "details": "参与对话，具体反制措施不明",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "美国", "阿根廷", "德国", "韩国"],
+     "response": [
+       {
+        "type": "外交/对话",
+        "details": "参与经济对话以应对美国政策",
+        "effectiveDate": null,
+        "targetedSectors": null,
+         "value": null
+      }
+    ],
+    "longitude": -51.9253,
+    "latitude": -14.2350,
+    "isMajor": true,
+     "impact": "关注贸易政策变化对其农产品出口的影响。"
+  },
+  {
+    "name": "新加坡",
+    "code": "SG",
+    "code3": "SGP",
+    "region": "东南亚",
+    "tariffRate": 10,
+    "details": "对美加征10%关税，未报复",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 0,
+    "yearData": [],
+    "tradePartners": ["中国", "马来西亚", "美国", "印尼", "香港"],
+    "response": [
+        {
+            "type": "暂无报复",
+            "details": "决定暂时不对美国商品征收回应性关税",
+            "effectiveDate": null,
+            "targetedSectors": null,
+            "value": null
+        }
+    ],
+    "longitude": 103.8198,
+    "latitude": 1.3521,
+    "isMajor": false,
+    "impact": "关税税率相对较低，积极参与区域合作。"
+  },
+  {
+    "name": "马来西亚",
+    "code": "MY",
+    "code3": "MYS",
+    "region": "东南亚",
+    "tariffRate": 24,
+    "details": "对美加征24%关税",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "新加坡", "美国", "日本", "泰国"],
+    "response": [
+         {
+            "type": "评估/协调",
+            "details": "正在评估关税影响，寻求与东盟协调应对",
+            "effectiveDate": null,
+            "targetedSectors": null,
+            "value": null
+        }
+    ],
+    "longitude": 101.9758,
+    "latitude": 4.2105,
+    "isMajor": false,
+    "impact": "受较高关税影响，寻求区域协调。"
+  },
+   {
+    "name": "泰国",
+    "code": "TH",
+    "code3": "THA",
+    "region": "东南亚",
+    "tariffRate": 36,
+    "details": "对美加征36%关税",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "日本", "美国", "马来西亚", "越南"],
+    "response": [
+        {
+            "type": "外交协商",
+            "details": "派财政部长赴美协商，缓解关税冲击",
+            "effectiveDate": null,
+            "targetedSectors": null,
+            "value": null
+        }
+    ],
+    "longitude": 100.9925,
+    "latitude": 15.8700,
+    "isMajor": false,
+    "impact": "关税税率高，积极寻求外交解决。"
+  },
+  {
+    "name": "印度尼西亚",
+    "code": "ID",
+    "code3": "IDN",
+    "region": "东南亚",
+    "tariffRate": 32,
+    "details": "对美加征32%关税",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 1,
+    "yearData": [],
+    "tradePartners": ["中国", "日本", "新加坡", "美国", "印度"],
+    "response": [
+         {
+            "type": "外交/规则调整",
+            "details": "计划通过外交谈判寻求解决方案，并放宽贸易规则",
+            "effectiveDate": null,
+            "targetedSectors": null,
+            "value": null
+        }
+    ],
+    "longitude": 113.9213,
+    "latitude": -0.7893,
+    "isMajor": false,
+    "impact": "高关税影响出口，寻求谈判和规则调整。"
+  },
+  {
+    "name": "新西兰",
+    "code": "NZ",
+    "code3": "NZL",
+    "region": "大洋洲",
+    "tariffRate": 10,
+    "details": "对美加征10%关税",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 0,
+    "yearData": [],
+    "tradePartners": ["中国", "澳大利亚", "美国", "日本", "德国"],
+    "response": [],
+    "longitude": 174.8860,
+    "latitude": -40.9006,
+    "isMajor": false,
+    "impact": "面临最低基准税率，影响相对较小。"
+  },
+  {
+    "name": "俄罗斯",
+    "code": "RU",
+    "code3": "RUS",
+    "region": "欧亚",
+    "tariffRate": null,
+    "details": "未找到明确对美关税反制信息",
+    "agricultureTariff": null,
+    "industrialTariff": null,
+    "highestTariff": null,
+    "highestCategory": null,
+    "tradeResponseMeasures": 0,
+    "yearData": [],
+    "tradePartners": ["中国", "德国", "白俄罗斯", "荷兰", "意大利"],
+    "response": [],
+    "longitude": 105.3188,
+    "latitude": 61.5240,
+    "isMajor": true,
+    "impact": "受其他地缘政治因素影响更大，关税反制情况不明。"
+  }
+]
+} 

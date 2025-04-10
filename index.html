@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全球关税数据可视化项目</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- Shards UI Dependencies (Bootstrap CSS) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <!-- Shards UI CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shards-ui/3.0.0/css/shards.min.css" />
+  <!-- Shards UI Extras (optional themes/components) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shards-ui/3.0.0/css/shards-extras.min.css" />
+  <!-- Leaflet CSS (Needed for map component if used) -->
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <style>
+    /* Custom styles can go here, adjust or remove as needed after applying Shards */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f5f7f9; /* Default Shards background */
+    }
+    
+    /* Keep drawer styles for now, ensure it's hidden by default */
+    .drawer {
+      transition: all 0.3s ease;
+      transform: translateX(100%);
+      z-index: 1050; /* Higher z-index for potential modal overlay */
+      position: fixed; /* Ensure it's fixed */
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 320px; /* Adjust width */
+      background-color: white;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      display: flex; /* Use flex for header/content */
+      flex-direction: column;
+    }
+    .drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+       padding: 1rem;
+       background-color: #007bff; /* Shards primary blue */
+       color: white;
+       flex-shrink: 0; /* Prevent header shrinking */
+    }
+     .drawer-body {
+        padding: 1rem;
+        flex-grow: 1; /* Allow body to fill space */
+        overflow-y: auto; /* Scroll within body */
+     }
+     .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      z-index: 1040; /* Below drawer */
+    }
+    .drawer-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #tariff-world-map, #tariff-bar-chart {
+        min-height: 450px; /* Ensure charts have height */
+    }
+    .tab-content {
+        padding-top: 1rem;
+    }
+
+    /* Adjust D3 tooltip styles slightly */
+    .tariff-tooltip {
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      pointer-events: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 0.8rem;
+      opacity: 0;
+      z-index: 1100; /* Ensure tooltip is on top */
+    }
+
+    /* Horizontal Timeline Styles - Revised */
+    .timeline-wrapper {
+        display: flex;
+        overflow-x: auto; /* Ensure horizontal scrolling is enabled */
+        padding: 30px 10px 40px 10px; /* Increased top/bottom padding */
+        position: relative;
+        /* Remove background-image line */
+        /* background-image: linear-gradient(to right, #dee2e6 50%, transparent 50%); */
+        /* background-size: 10px 2px; */
+        /* background-repeat: repeat-x; */
+        /* background-position: bottom 20px left 0; */
+        width: 100%; /* Ensure wrapper takes full width */
+        border-top: 1px solid #eee; /* Add border for context */
+        margin-top: 1rem;
+    }
+    /* Add the horizontal line */
+    .timeline-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 20px; /* Position the line */
+        height: 2px;
+        width: 100%; /* Make line span the container */
+        background-color: #dee2e6; /* Line color */
+        z-index: 1; /* Ensure line is behind items */
+    }
+
+    .timeline-item {
+        flex: 0 0 auto; 
+        width: 220px; /* Slightly wider items */
+        margin-right: 30px; 
+        position: relative;
+        padding-bottom: 30px; /* Adjust padding */
+        z-index: 2; /* Ensure items are above the line */
+    }
+    /* Connector dot */
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        bottom: 16px; /* Center the dot on the line */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 10px; /* Dot size */
+        height: 10px; /* Dot size */
+        background-color: #007bff; /* Dot color */
+        border: 2px solid white;
+        border-radius: 50%;
+        z-index: 3; /* Dot above line */
+    }
+     .timeline-item .card {
+         margin-bottom: 0; 
+         height: 100%;
+         border: 1px solid #e1e5eb;
+     }
+     .timeline-item .card-body {
+         padding: 0.8rem;
+     }
+     .timeline-item .card-title {
+         font-size: 0.85rem;
+         margin-bottom: 0.3rem;
+     }
+      .timeline-item .card-text {
+         font-size: 0.75rem;
+     }
+     /* Ensure scrollbar is visible */
+    /* Remove styles hiding the scrollbar */
+    /* .timeline-wrapper::-webkit-scrollbar {
+        display: none; 
+    }
+    .timeline-wrapper {
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    } */
+
+  </style>
+</head>
+<body>
+  <!-- Navbar using Shards UI -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <!-- You can add an SVG icon here if needed -->
+         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-globe mr-2" viewBox="0 0 16 16">
+           <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4.06a.75.75 0 0 1-1.09-.535A8.01 8.01 0 0 1 7.5 1.077M4.09 4.695A7.03 7.03 0 0 0 3.06 8c0 .987.206 1.907.58 2.743.878.22 1.59.514 2.067.9.41.346.734.743 1.012 1.195.717.936 1.368 2.06 1.96 3.07A8 8 0 0 1 4.09 4.695m1.447-.226C6.683 3.71 7.92 3 9.5 3h.01c.846 0 1.571.29 2.178.765a.75.75 0 0 1-.97 1.134 6.5 6.5 0 0 0-1.304-.41A6.5 6.5 0 0 0 8.25 4.51a.75.75 0 0 1-.5-.547M10.855 4.06a.75.75 0 0 1 .535 1.09A7.98 7.98 0 0 0 12.933 8c0 .936-.213 1.806-.58 2.59.3-.07.59-.16.87-.28.28-.12.55-.27.81-.44a.75.75 0 0 1 .536 1.086 8 8 0 1 1-10.676 0 .75.75 0 0 1 .536-1.086 7.00 7.00 0 0 0 1.68-.72c.28-.17.55-.36.81-.57.27-.22.53-.47.78-.74.25-.28.48-.59.7-.93.22-.34.43-.72.62-1.13a7.97 7.97 0 0 0 .42-1.855.75.75 0 0 1 1.09-.535M8.5 5.093a6.5 6.5 0 0 0-1.344 4.79A6.5 6.5 0 0 0 8.5 11.167a.75.75 0 1 1-.6-1.3 5 5 0 0 1 .34-3.675.75.75 0 1 1 1.3-.6z"/>
+        </svg>
+        全球关税数据可视化
+      </a>
+      <span class="badge badge-danger">2025年4月15日更新</span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Dashboard Header (simplified) -->
+    <div class="page-header row no-gutters py-4">
+      <div class="col-12 col-sm-8 text-center text-sm-left mb-0">
+        <h3 class="page-title">美国关税政策数据可视化仪表盘</h3>
+        <span class="text-uppercase page-subtitle">全面展示全球贸易体系中的关税政策变化及各国应对措施</span>
+      </div>
+    </div>
+
+    <!-- Key Indicators using Shards Cards -->
+    <div class="row mb-4">
+      <div class="col-md-4 mb-3">
+        <div class="card card-small">
+          <div class="card-body d-flex align-items-center">
+             <div class="mr-3 text-danger">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up-arrow" viewBox="0 0 16 16">
+                   <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
+                </svg>
+             </div>
+            <div>
+              <h6 class="stats-small__label text-uppercase">平均关税税率</h6>
+              <h4 id="avg-tariff-rate" class="stats-small__value count my-3">--%</h4>
+              <span class="stats-small__percentage stats-small__percentage--increase text-danger">较2023年提高 -- 个百分点</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+         <div class="card card-small">
+          <div class="card-body d-flex align-items-center">
+             <div class="mr-3 text-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
+                    <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12 12 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A20 20 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5h11.778z"/>
+                </svg>
+             </div>
+            <div>
+              <h6 class="stats-small__label text-uppercase">最高关税国家</h6>
+              <h4 id="highest-tariff-country" class="stats-small__value count my-3">-- (--%)</h4>
+              <span class="stats-small__percentage text-muted">主要针对 --</span>
+            </div>
+          </div>
+        </div>
+      </div>
+       <div class="col-md-4 mb-3">
+         <div class="card card-small">
+          <div class="card-body d-flex align-items-center">
+             <div class="mr-3 text-success">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                  <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                </svg>
+             </div>
+            <div>
+              <h6 class="stats-small__label text-uppercase">反制措施国家</h6>
+              <h4 id="response-countries-count" class="stats-small__value count my-3">--个</h4>
+              <span class="stats-small__percentage text-muted">占美国主要贸易伙伴的 --%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Visualization Tabs (Map and Table) - Moved Up -->
+    <div class="card card-small mb-4">
+        <div class="card-header border-bottom">
+             <ul class="nav nav-tabs card-header-tabs" id="visualizationTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="worldmap-tab" data-toggle="tab" href="#content-worldmap" role="tab" aria-controls="content-worldmap" aria-selected="true">世界关税地图</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="datatable-tab" data-toggle="tab" href="#content-datatable" role="tab" aria-controls="content-datatable" aria-selected="false">详细数据表格</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-0">
+             <div class="tab-content" id="visualizationTabsContent">
+                 <div class="tab-pane fade show active p-3" id="content-worldmap" role="tabpanel" aria-labelledby="worldmap-tab">
+                    <h5 class="card-title">全球关税概览地图</h5>
+                    <p class="card-text text-muted">点击地图上的国家查看详细关税信息和反制措施。</p>
+                    <div id="tariff-world-map" class="w-full"></div>
+                </div>
+                 <div class="tab-pane fade p-3" id="content-datatable" role="tabpanel" aria-labelledby="datatable-tab">
+                    <h5 class="card-title">详细关税数据</h5>
+                     <p class="card-text text-muted">浏览各国的详细关税数据和反制措施列表。点击行查看详情。</p>
+                    <div id="tariff-data-table" class="w-full table-responsive"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bar Chart Section (Now in secondary position) -->
+    <div class="card card-small mb-4">
+        <div class="card-header border-bottom">
+            <h6 class="m-0">主要贸易伙伴关税率对比</h6>
+        </div>
+        <div class="card-body">
+            <p class="card-text text-muted small">比较不同国家对美国的平均关税税率。点击柱状图查看详情。</p>
+            <div id="tariff-bar-chart" class="w-full"></div>
+        </div>
+    </div>
+
+    <!-- Country Details Drawer Panel (Kept existing structure, hidden by default) -->
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+    <aside id="country-details-panel" class="drawer"> <!-- Removed 'open' class -->
+      <div class="drawer-header d-flex justify-content-between align-items-center">
+        <h5 id="country-details-title" class="mb-0">国家详情</h5>
+        <button id="close-details" class="btn btn-light btn-sm p-1 rounded-circle" style="line-height: 1;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+          </svg>
+        </button>
+      </div>
+      <div id="country-details-content" class="drawer-body">
+        <p class="text-muted">请在地图、图表或表格中选择一个国家以查看详情。</p>
+      </div>
+    </aside>
+
+    <!-- Analysis Trend Cards -->
+    <div class="row mb-4">
+      <div class="col-lg-6 mb-4">
+        <div class="card card-small h-100">
+          <div class="card-header border-bottom">
+            <h6 class="m-0">各类反制措施使用情况</h6>
+          </div>
+          <div class="card-body pt-0">
+            <p class="text-muted small mt-2">说明：百分比表示在所有已确认采取反制措施的国家中，使用该类型措施的国家所占的比例。</p>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0">
+                <div class="progress-wrapper">
+                  <strong class="text-muted d-block mb-2">关税反制</strong>
+                  <div class="progress progress-sm" style="height: 5px;">
+                    <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                      <span class="progress-value">--%</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item px-0">
+                 <div class="progress-wrapper">
+                  <strong class="text-muted d-block mb-2">非关税壁垒</strong>
+                  <div class="progress progress-sm" style="height: 5px;">
+                    <div class="progress-bar bg-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                      <span class="progress-value">--%</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+               <li class="list-group-item px-0">
+                 <div class="progress-wrapper">
+                  <strong class="text-muted d-block mb-2">出口限制</strong>
+                  <div class="progress progress-sm" style="height: 5px;">
+                    <div class="progress-bar bg-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                      <span class="progress-value">--%</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+               <li class="list-group-item px-0">
+                 <div class="progress-wrapper">
+                  <strong class="text-muted d-block mb-2">国际诉讼</strong>
+                  <div class="progress progress-sm" style="height: 5px;">
+                    <div class="progress-bar bg-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                      <span class="progress-value">--%</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 mb-4">
+        <div class="card card-small h-100">
+           <div class="card-header border-bottom">
+            <h6 class="m-0">区域关税变化</h6>
+          </div>
+           <div class="card-body">
+              <div class="row">
+                 <div class="col-6 mb-3">
+                     <div class="p-2 rounded bg-light">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge badge-danger mr-2" style="width: 10px; height: 10px; padding: 0;"></span>
+                            <h6 class="m-0 text-muted">亚洲</h6>
+                        </div>
+                        <h5 class="m-0">+--%</h5>
+                        <small class="text-muted">平均关税率变化</small>
+                    </div>
+                 </div>
+                 <div class="col-6 mb-3">
+                     <div class="p-2 rounded bg-light">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge badge-primary mr-2" style="width: 10px; height: 10px; padding: 0;"></span>
+                            <h6 class="m-0 text-muted">欧洲</h6>
+                        </div>
+                        <h5 class="m-0">+--%</h5>
+                        <small class="text-muted">平均关税率变化</small>
+                    </div>
+                 </div>
+                 <div class="col-6">
+                     <div class="p-2 rounded bg-light">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge badge-warning mr-2" style="width: 10px; height: 10px; padding: 0;"></span>
+                            <h6 class="m-0 text-muted">美洲</h6>
+                        </div>
+                        <h5 class="m-0">+--%</h5>
+                        <small class="text-muted">平均关税率变化</small>
+                    </div>
+                 </div>
+                 <div class="col-6">
+                     <div class="p-2 rounded bg-light">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge badge-success mr-2" style="width: 10px; height: 10px; padding: 0;"></span>
+                            <h6 class="m-0 text-muted">其他地区</h6>
+                        </div>
+                        <h5 class="m-0">+--%</h5>
+                        <small class="text-muted">平均关税率变化</small>
+                    </div>
+                 </div>
+             </div>
+           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Section: Trade Volume and Sector Impact -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card card-small h-100">
+                <div class="card-header border-bottom">
+                    <h6 class="m-0">主要贸易伙伴贸易额变化 (占位符)</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">此处未来可展示主要贸易伙伴与美国双边贸易额在关税政策实施前后的变化图表或数据。</p>
+                    <!-- Placeholder for potential chart/data -->
+                    <div class="text-center py-4">
+                        <span class="text-muted small">[贸易额变化图表/数据区域]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card card-small h-100">
+                <div class="card-header border-bottom">
+                    <h6 class="m-0">主要影响行业分析 (占位符)</h6>
+                </div>
+                <div class="card-body">
+                     <p class="text-muted">此处未来可展示受关税政策影响较大的主要行业列表及其具体影响分析。</p>
+                     <!-- Placeholder for sector analysis -->
+                     <ul class="list-group list-group-flush">
+                         <li class="list-group-item"><span class="badge badge-danger mr-2">高</span> 汽车制造业</li>
+                         <li class="list-group-item"><span class="badge badge-warning mr-2">中</span> 农产品</li>
+                         <li class="list-group-item"><span class="badge badge-warning mr-2">中</span> 钢铁与铝材</li>
+                         <li class="list-group-item"><span class="badge badge-info mr-2">低</span> 消费电子</li>
+                     </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="card card-small mb-4">
+         <div class="card-header border-bottom">
+            <h6 class="m-0">关税事件时间轴</h6>
+        </div>
+        <div class="card-body p-0"> 
+            <div id="tariff-timeline" class="timeline-wrapper"> 
+                 <p class="text-muted p-3">正在加载时间轴数据...</p> 
+            </div>
+        </div>
+    </div>
+
+    <!-- New Section: Market Performance -->
+    <div class="card card-small mb-4">
+         <div class="card-header border-bottom">
+            <h6 class="m-0">近期主要股市走势 (占位符)</h6>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">此处未来可集成财经数据 API 或展示主要股指（如 S&P 500, 上证指数, Stoxx 600）在关税事件影响下的走势图。</p>
+             <div class="text-center py-4">
+                <span class="text-muted small">[股市走势图表区域]</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Source Section using Shards Card -->
+    <div class="card card-small mb-4">
+      <div class="card-header border-bottom">
+        <h6 class="m-0">数据来源与分析</h6>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3 mb-md-0">
+            <div class="d-flex align-items-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bar-chart-fill mr-2 text-primary" viewBox="0 0 16 16">
+                 <path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/>
+              </svg>
+              <h6 class="m-0">官方数据</h6>
+            </div>
+            <p class="text-muted mb-0 small">各国政府官方公告、贸易部门发布的关税政策和贸易统计数据</p>
+          </div>
+          <div class="col-md-4 mb-3 mb-md-0">
+            <div class="d-flex align-items-center mb-2">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bank mr-2 text-primary" viewBox="0 0 16 16">
+                <path d="m8 0 6.61 3h.89a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v7a.5.5 0 0 1 .485.38l.5 2a.498.498 0 0 1-.485.62H.5a.498.498 0 0 1-.485-.62l.5-2A.5.5 0 0 1 1 13V6H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 3h.89zM3.777 3h8.447L8 1zM2 6v7h1V6zm2 0v7h1.5V6zm3.5 0v7h1V6zm2 0v7h1.5V6zm3.5 0v7h1V6zM15 5H1v-1h14zM.5 15h15v-1H.5z"/>
+              </svg>
+              <h6 class="m-0">国际组织</h6>
+            </div>
+            <p class="text-muted mb-0 small">WTO、IMF、世界银行等国际组织发布的贸易政策评估报告和经济影响分析</p>
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex align-items-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-newspaper mr-2 text-primary" viewBox="0 0 16 16">
+                 <path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.5A1.5 1.5 0 0 1 0 13.5zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5z"/>
+                 <path d="M2 3h10v2H2zm0 3h4v3H2zm0 4h4v1H2zm0 2h4v1H2zm5-6h2v1H7zm3 0h2v1h-2zM7 7h2v1H7zm3 0h2v1h-2zm-3 2h2v1H7zm3 0h2v1h-2zm-3 2h2v1H7zm3 0h2v1h-2z"/>
+               </svg>
+              <h6 class="m-0">媒体报道</h6>
+            </div>
+            <p class="text-muted mb-0 small">经济学人、金融时报、华尔街日报等权威媒体的深度报道和分析</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer d-flex p-2 px-3 bg-white border-top">
+      <span class="copyright ml-auto my-auto mr-2">Copyright © 2025 美国关税政策与全球应对数据库</span>
+    </footer>
+  </div>
+
+  <!-- Shards UI Dependencies (jQuery, Popper.js, Bootstrap JS) -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+  <!-- Shards UI JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shards-ui/3.0.0/js/shards.min.js"></script>
+  <!-- D3.js (Needed for charts) -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Leaflet JS (Needed for map component if used) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Your Component Scripts (Load AFTER dependencies) -->
+   <script src="components/TariffWorldMap.js"></script>
+   <script src="components/TariffBarChart.js"></script>
+   <script src="components/TariffDataTable.js"></script>
+
+  <!-- Inline script for initialization and interactions -->
+  <script>
+    // Keep the existing JavaScript logic for now
+    // We'll need to adjust selectors and potentially drawer logic later
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tab switching functionality (should work with Bootstrap/Shards tabs)
+      // const tabs = document.querySelectorAll('.tab-button'); // Old selector
+      // const contents = document.querySelectorAll('.tab-content'); // Old selector
+      
+      // No need for manual tab switching logic, Bootstrap handles it via data-toggle="tab"
+      
+      // Initialize World Map Component
+      try {
+          window.tariffMap = new TariffWorldMap({
+            containerId: 'tariff-world-map', 
+            dataPath: 'data/tariff_data.json',
+            width: document.getElementById('tariff-world-map')?.clientWidth || 800, // Default width
+            height: 500,
+            onCountryClick: handleCountryClick 
+          });
+      } catch (e) {
+          console.error("Failed to initialize TariffWorldMap:", e);
+          document.getElementById('tariff-world-map').innerHTML = '<p class="text-danger">地图加载失败。</p>';
+      }
+      
+      // Initialize Bar Chart Component
+       try {
+            window.tariffChart = new TariffBarChart({
+                containerId: 'tariff-bar-chart', 
+                dataPath: 'data/tariff_data.json',
+                width: document.getElementById('tariff-bar-chart')?.clientWidth || 800,
+                height: 500,
+                onBarClick: handleCountryClick 
+            });
+       } catch (e) {
+           console.error("Failed to initialize TariffBarChart:", e);
+            document.getElementById('tariff-bar-chart').innerHTML = '<p class="text-danger">图表加载失败。</p>';
+       }
+      
+      // Initialize Data Table Component
+      try {
+            window.tariffTable = new TariffDataTable({
+                containerId: 'tariff-data-table', 
+                dataPath: 'data/tariff_data.json',
+                pageSize: 10,
+                onRowClick: handleCountryClick 
+            });
+      } catch (e) {
+          console.error("Failed to initialize TariffDataTable:", e);
+          document.getElementById('tariff-data-table').innerHTML = '<p class="text-danger">表格加载失败。</p>';
+      }
+      
+      // Load data and update key indicators & trend cards
+      loadAndPopulateData(); 
+      
+      // Load and render timeline data
+      loadAndRenderTimeline();
+
+      // Country details panel interactions
+      const closeButton = document.getElementById('close-details');
+      const detailsPanel = document.getElementById('country-details-panel');
+      const drawerOverlay = document.getElementById('drawer-overlay');
+
+      if (closeButton && detailsPanel && drawerOverlay) {
+          closeButton.addEventListener('click', closeDrawer);
+          drawerOverlay.addEventListener('click', closeDrawer);
+      }
+      
+      // Function to open the drawer (called by handleCountryClick)
+      function openDrawer() {
+          if (detailsPanel && drawerOverlay) {
+              detailsPanel.classList.add('open');
+              drawerOverlay.classList.add('open');
+          }
+      }
+
+      // Function to close the drawer
+      function closeDrawer() {
+         if (detailsPanel && drawerOverlay) {
+            detailsPanel.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+         }
+      }
+      
+      // Attach resize handler
+      window.addEventListener('resize', handleResize);
+
+      // Make openDrawer globally accessible or pass it to handleCountryClick if needed
+       window.openDrawer = openDrawer; 
+
+    });
+    
+    // --- Data Loading and Population --- 
+    async function loadAndPopulateData() {
+      try {
+        const response = await fetch('data/tariff_data.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // --- Update Key Indicators (Shards Version) ---
+        const avgTariffRateEl = document.getElementById('avg-tariff-rate');
+        const highestTariffCountryEl = document.getElementById('highest-tariff-country');
+        const responseCountriesCountEl = document.getElementById('response-countries-count');
+        const avgTariffRateParentSpan = avgTariffRateEl ? avgTariffRateEl.closest('.card-body').querySelector('.stats-small__percentage') : null;
+        const highestTariffCountryParentSpan = highestTariffCountryEl ? highestTariffCountryEl.closest('.card-body').querySelector('.stats-small__percentage') : null;
+        const responseCountriesCountParentSpan = responseCountriesCountEl ? responseCountriesCountEl.closest('.card-body').querySelector('.stats-small__percentage') : null;
+
+        if (data.summary) {
+            if (avgTariffRateEl) avgTariffRateEl.textContent = data.summary.averageTariff + '%';
+             if (avgTariffRateParentSpan && data.summary.changeVs2023) {
+               avgTariffRateParentSpan.textContent = `较2023年提高 ${data.summary.changeVs2023} 个百分点`;
+               avgTariffRateParentSpan.classList.toggle('text-danger', data.summary.changeVs2023 > 0);
+               avgTariffRateParentSpan.classList.toggle('text-success', data.summary.changeVs2023 < 0);
+            } else if (avgTariffRateParentSpan) {
+                 avgTariffRateParentSpan.textContent = ''; 
+            }
+
+            if (highestTariffCountryEl && data.summary.highestTariff) {
+                 highestTariffCountryEl.textContent = 
+                    `${data.summary.highestTariff.country} (${data.summary.highestTariff.rate}%)`;
+            }
+            if (highestTariffCountryParentSpan && data.summary.highestTariff?.targetSectors) {
+                 highestTariffCountryParentSpan.textContent = `主要针对 ${data.summary.highestTariff.targetSectors}`;
+            } else if (highestTariffCountryParentSpan) {
+                highestTariffCountryParentSpan.textContent = ''; 
+            }
+        } else {
+             if (avgTariffRateEl) avgTariffRateEl.textContent = 'N/A';
+             if (highestTariffCountryEl) highestTariffCountryEl.textContent = 'N/A';
+        }
+
+        const countriesWithResponses = data.countries ? data.countries.filter(c => c.response && c.response.length > 0) : [];
+        if (responseCountriesCountEl) responseCountriesCountEl.textContent = `${countriesWithResponses.length}个`;
+        if (responseCountriesCountParentSpan && data.summary?.totalTradePartners) {
+             const percentage = data.summary.totalTradePartners > 0 ? ((countriesWithResponses.length / data.summary.totalTradePartners) * 100).toFixed(0) : 0;
+             responseCountriesCountParentSpan.textContent = `占美国主要贸易伙伴的 ${percentage}%`;
+        } else if (responseCountriesCountParentSpan) {
+             responseCountriesCountParentSpan.textContent = ''; 
+        }
+
+        // --- Update Trend Cards (Shards Progress Version) ---
+        if (data.trends) {
+            updateTrendProgressBarShards('关税反制', data.trends.counterTariffs, 'danger');
+            updateTrendProgressBarShards('非关税壁垒', data.trends.nonTariffBarriers, 'warning');
+            updateTrendProgressBarShards('出口限制', data.trends.exportRestrictions, 'info');
+            updateTrendProgressBarShards('国际诉讼', data.trends.internationalLitigation, 'success');
+
+            updateRegionCardShards('亚洲', data.trends.regionalChanges?.asia, 'danger');
+            updateRegionCardShards('欧洲', data.trends.regionalChanges?.europe, 'primary');
+            updateRegionCardShards('美洲', data.trends.regionalChanges?.americas, 'warning');
+            updateRegionCardShards('其他地区', data.trends.regionalChanges?.others, 'success');
+        }
+        
+      } catch (error) {
+        console.error('加载和填充数据失败:', error);
+      }
+    }
+
+    // Updated function for Shards progress bars
+    function updateTrendProgressBarShards(trendName, percentage, colorClass) {
+        const container = document.querySelector('.list-group'); // Target the list group
+        if (!container || typeof percentage === 'undefined') return;
+
+        // Find the strong tag with the trend name
+        const strongElement = Array.from(container.querySelectorAll('strong.text-muted')).find(strong => strong.textContent === trendName);
+        if (strongElement) {
+            const progressWrapper = strongElement.closest('.progress-wrapper');
+            if (progressWrapper) {
+                 const progressBar = progressWrapper.querySelector('.progress-bar');
+                 const progressValue = progressWrapper.querySelector('.progress-value');
+                 if (progressBar) {
+                     progressBar.style.width = `${percentage}%`;
+                     progressBar.setAttribute('aria-valuenow', percentage);
+                     // Remove old color classes, add new one
+                     progressBar.classList.remove('bg-danger', 'bg-warning', 'bg-info', 'bg-success');
+                     progressBar.classList.add(`bg-${colorClass}`);
+                 }
+                  if (progressValue) {
+                      progressValue.textContent = `${percentage}%`;
+                  }
+            }
+        }
+    }
+    
+    // Updated function for Shards region cards
+    function updateRegionCardShards(regionName, changePercentage, colorClass) {
+        const container = document.querySelector('.card-body .row'); // Target the row within the region card
+         if (!container || typeof changePercentage === 'undefined') return;
+
+        const h6Element = Array.from(container.querySelectorAll('h6.text-muted')).find(h6 => h6.textContent === regionName);
+         if (h6Element) {
+            const parentDiv = h6Element.closest('.col-6'); // Find the parent column
+            if (parentDiv) {
+                 const percentageH5 = parentDiv.querySelector('h5.m-0');
+                 const badgeSpan = parentDiv.querySelector('.badge');
+                 if (percentageH5) percentageH5.textContent = `${changePercentage >= 0 ? '+' : ''}${changePercentage}%`;
+                 if (badgeSpan) {
+                      // Remove old color classes, add new one
+                      badgeSpan.classList.remove('badge-danger', 'badge-primary', 'badge-warning', 'badge-success');
+                      badgeSpan.classList.add(`badge-${colorClass}`);
+                 }
+            }
+         }
+    }
+    
+    // --- Timeline Functionality (Updated for Horizontal Layout) --- 
+    async function loadAndRenderTimeline() {
+        const timelineContainer = document.getElementById('tariff-timeline');
+        if (!timelineContainer) return;
+
+        try {
+            const response = await fetch('data/tariff_data.json');
+            if (!response.ok) throw new Error('Failed to load timeline data');
+            const data = await response.json();
+
+            if (!data.timeline || !Array.isArray(data.timeline) || data.timeline.length === 0) {
+                 timelineContainer.innerHTML = '<p class="text-muted p-3">暂无时间轴数据。</p>';
+                 return;
+            }
+
+            // Sort events by date ascending
+            const sortedTimeline = data.timeline.sort((a, b) => {
+                 const dateA = new Date(a.date);
+                 const dateB = new Date(b.date);
+                 if (isNaN(dateA) || isNaN(dateB)) return 0;
+                 return dateA - dateB;
+            });
+
+            let timelineHTML = ''; // Build items directly inside the wrapper
+
+            sortedTimeline.forEach((event, index) => {
+                timelineHTML += `
+                    <div class="timeline-item">
+                        <div class="card card-small shadow-sm">
+                             <div class="card-body">
+                                <h6 class="card-title text-primary mb-1">${event.date || '未知日期'}</h6>
+                                <p class="card-text font-weight-bold mb-1">${event.title || '未知事件'}</p>
+                                <p class="card-text small text-muted mb-1">${event.description || ''}</p>
+                                ${event.details ? `<p class="card-text small text-muted font-italic mb-0">(${event.details})</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            timelineContainer.innerHTML = timelineHTML; // Replace placeholder with timeline items
+
+        } catch (error) {
+            console.error("Failed to load or render timeline:", error);
+            timelineContainer.innerHTML = '<p class="text-danger p-3">时间轴加载失败。</p>';
+        }
+    }
+
+    // --- Country Click Handler (Updated) --- 
+    function handleCountryClick(countryData) {
+      const detailsContent = document.getElementById('country-details-content');
+      const detailsTitle = document.getElementById('country-details-title');
+
+      if (!countryData || !detailsContent || !detailsTitle) {
+          console.error("Drawer elements not found or no country data provided.");
+          detailsContent.innerHTML = '<p class="text-danger">无法加载国家详情。</p>'; // Provide feedback
+          return; 
+      }
+      
+      detailsTitle.textContent = countryData.name || '国家详情'; 
+      
+      // --- Build HTML Content for Drawer ---
+      let detailsHTML = '';
+
+      // 1. US Tariff Information Section
+      detailsHTML += `
+        <div class="mb-3 pb-3 border-bottom">
+          <h6 class="text-uppercase text-muted mb-2">美国对该国主要关税措施</h6>
+          <p class="mb-1">
+            <strong class="text-danger">当前主要有效税率 (估算): ${countryData.tariffRate !== null ? countryData.tariffRate + '%' : 'N/A'}</strong> 
+          </p>
+          ${countryData.details ? `<p class="small text-muted mb-2">说明: ${countryData.details}</p>` : ''}
+          
+          ${/* Check if usTariffHistory exists and is an array */
+            countryData.usTariffHistory && Array.isArray(countryData.usTariffHistory) && countryData.usTariffHistory.length > 0 ? `
+            <h6 class="text-muted small mt-3 mb-2">关税历史记录 (部分):</h6>
+            <ul class="list-unstyled">` + 
+            countryData.usTariffHistory.map(action => `
+              <li class="mb-2 pb-2 border-bottom border-light">
+                 <strong class="d-block small">${action.date || '日期未知'}</strong>
+                 <p class="small mb-1">${action.description || '描述未知'}</p>
+                 ${action.details ? `<p class="small text-muted mb-1">细节: ${action.details}</p>` : ''}
+                 ${action.effectiveDate ? `<p class="small text-muted mb-0">生效日期: ${action.effectiveDate}</p>` : ''}
+              </li>
+            `).join('') + 
+            `</ul>` : 
+            '<p class="small text-muted mb-0">暂无详细的美国对该国关税历史记录。</p>'
+          }
+          
+        </div>
+      `;
+      
+      // 2. Countermeasures Section
+      detailsHTML += `<div class="mb-3 pb-3 border-bottom">
+          <h6 class="text-uppercase text-muted mb-2">该国反制措施</h6>`;
+      if (countryData.response && countryData.response.length > 0) {
+        detailsHTML += `<ul class="list-unstyled">`; 
+        countryData.response.forEach(response => {
+          detailsHTML += `
+            <li class="mb-3">
+               <strong class="d-block mb-1">${response.type || '未知类型'} ${response.effectiveDate ? `<span class="badge badge-secondary font-weight-normal ml-1">生效: ${response.effectiveDate}</span>` : ''}</strong>
+              <p class="mb-1 small text-muted">${response.details || '无详细说明'}</p>
+              ${response.targetedSectors && response.targetedSectors.length > 0 ? `
+                <div class="mt-1 mb-1">
+                  <small class="text-muted d-block">针对行业/领域:</small>
+                  ${response.targetedSectors.map(sector => `
+                    <span class="badge badge-pill badge-info mr-1">${sector}</span>
+                  `).join('')}
+                </div>
+              ` : ''}
+               ${response.value ? `
+                 <div class="mt-1"><small class="text-muted">影响价值: ${response.value}</small></div>
+               `: ''}
+            </li>
+          `;
+        });
+        detailsHTML += `</ul>`;
+      } else {
+        detailsHTML += `<p class="text-muted small">暂无记录或公开的反制措施。</p>`;
+      }
+       detailsHTML += `</div>`; 
+
+      // 3. Impact Section
+      if (countryData.impact) {
+           detailsHTML += `<div class="mb-3">
+               <h6 class="text-uppercase text-muted mb-2">主要影响评估</h6>
+               <p class="small text-muted">${countryData.impact}</p>
+           </div>`;
+      }
+      
+      // 4. Data Source Note
+      detailsHTML += `<hr><p class="small text-muted text-center mt-3">注：详细数据来源请参考页面底部的"数据来源与分析"部分。</p>`;
+
+      // Update drawer content
+      detailsContent.innerHTML = detailsHTML;
+      
+      // Open the drawer (Ensure openDrawer is accessible)
+      if (window.openDrawer) {
+          window.openDrawer();
+      } else {
+         console.warn("openDrawer function not found on window object.");
+      }
+    }
+    
+    // --- Resize Handler --- 
+    function handleResize() {
+      if (window.tariffMap) {
+         const mapContainer = document.getElementById('tariff-world-map');
+         if (mapContainer) {
+            window.tariffMap.resize(mapContainer.clientWidth, 500);
+         }
+      }
+      if (window.tariffChart) {
+         const chartContainer = document.getElementById('tariff-bar-chart');
+          if (chartContainer) {
+             window.tariffChart.resize(chartContainer.clientWidth, 500);
+          }
+      }
+    }
+  </script>
+
+</body>
+</html> 

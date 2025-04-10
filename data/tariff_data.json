@@ -2,8 +2,8 @@
   "summary": {
     "averageTariff": 20.5,
     "highestTariff": {
-      "country": "中国 (对美)",
-      "rate": 84
+      "country": "美国 (对华)",
+      "rate": 125
     },
     "responseCountries": 15,
     "changeVs2023": 17.1,
@@ -60,15 +60,21 @@
     },
      {
         "date": "2025-04-09",
-        "title": "中美关税战急剧升级",
-        "description": "美国宣布将对中国输美商品的关税从34%提高至84%。",
-        "details": "于4月10日生效。"
+        "title": "美国对华关税再升级",
+        "description": "美国宣布将对中国输美商品的关税从34%大幅提高至104%。",
+        "details": "贸易战急剧升级。"
     },
     {
         "date": "2025-04-10",
         "title": "中国对美实施对等反制",
         "description": "中国宣布对所有原产于美国的进口商品，在现行税率基础上加征84%的关税。",
         "details": "作为对美方关税升级的回应，同日生效。"
+    },
+    {
+        "date": "2025-04-11 (估算)",
+        "title": "美国对华关税提升至125%",
+        "description": "在美国将税率提升至104%后不久，再次宣布将针对中国的关税提高至125%。",
+        "details": "为当时已知的最高税率。"
     },
     {
         "date": "2025-04-15",
@@ -84,7 +90,7 @@
     "code3": "CHN",
     "region": "亚洲",
     "tariffRate": 84,
-    "details": "对美加征84%关税作为反制 (2025-04-10)。此前美国已多次对华加征关税。",
+    "details": "对美加征84%关税作为反制 (2025-04-10)。此前美国已多次对华加征关税至125%。",
     "agricultureTariff": null,
     "industrialTariff": null,
     "highestTariff": 84,
@@ -125,9 +131,15 @@
       },
        {
         "date": "2025-04-09 (宣布)",
-        "description": "美国将对中国输美商品关税从34%提高至84%",
+        "description": "美国将对中国输美商品关税从34%提高至104%",
         "details": "急剧升级 (与timeline信息整合)",
         "effectiveDate": "2025-04-10"
+      },
+       {
+        "date": "2025-04-11 (估算, 宣布)",
+        "description": "美国再次提高对华关税至125%",
+        "details": "在前一日大幅提升后的进一步升级。",
+        "effectiveDate": "待确认"
       }
     ],
     "response": [
@@ -137,7 +149,7 @@
         "effectiveDate": "2025-04-10",
         "targetedSectors": ["全品类"],
         "value": null,
-        "note": "作为对美方关税升级至84%的直接回应"
+        "note": "作为对美方将关税升级至104%/125%的回应"
       },
       {
         "type": "非关税壁垒",
@@ -150,18 +162,18 @@
     "longitude": 104.1954,
     "latitude": 35.8617,
     "isMajor": true,
-    "impact": "中美贸易摩擦显著升级，影响全球供应链。关税税率通过多次调整达到当前高位。"
+    "impact": "中美贸易摩擦极度升级，影响全球供应链。美国对华关税经多次调整达125%，中国反制税率为84%。"
   },
   {
     "name": "美国",
     "code": "US",
     "code3": "USA",
     "region": "北美洲",
-    "tariffRate": 10,
-    "details": "对所有进口商品加征10%基准关税，对中国商品加征至84%",
+    "tariffRate": 125,
+    "details": "对华商品综合关税提升至125% (2025-04)，包含基准关税及多轮额外加征。对其他国家征收10%基准关税。",
     "agricultureTariff": null,
     "industrialTariff": null,
-    "highestTariff": 84,
+    "highestTariff": 125,
     "highestCategory": "输美商品 (中国)",
     "tradeResponseMeasures": 0,
     "yearData": [],
@@ -170,7 +182,7 @@
     "longitude": -95.7129,
     "latitude": 37.0902,
     "isMajor": true,
-     "impact": "引发全球贸易伙伴广泛反制。"
+     "impact": "对华实施极高关税，引发中国及全球贸易伙伴广泛反制。"
   },
   {
     "name": "欧盟",

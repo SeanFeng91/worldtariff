@@ -192,7 +192,11 @@ class TariffWorldMap {
     const legendWidth = 300;
     const legendHeight = 15;
     const legendColors = this.colorScale.range();
-    const legendDomain = this.colorScale.domain();
+    // Get the actual domain thresholds used in the color scale
+    const colorDomain = this.colorScale.domain(); 
+    // Define the legend scale domain based on actual data range (0 to max threshold or a bit beyond)
+    const legendMin = 0;
+    const legendMax = Math.max(80, colorDomain[colorDomain.length - 1] + 5); // Go up to at least 80 or slightly above the max threshold
     
     // 创建图例标题
     this.legendGroup.append('text')
@@ -202,28 +206,50 @@ class TariffWorldMap {
       .attr('font-size', '12px')
       .attr('font-weight', 'bold');
     
-    // 创建颜色矩形
+    // 创建颜色矩形对应的线性比例尺
     const legendScale = d3.scaleLinear()
-      .domain([0, 25])
+      .domain([legendMin, legendMax]) // Use dynamic min/max
       .range([0, legendWidth]);
       
+    // Generate tick values based on the color scale domain, plus 0 and potentially max
+    let tickValues = [0, ...colorDomain]; 
+    if (legendMax > colorDomain[colorDomain.length - 1]) {
+        // Add a tick near the max if it extends beyond the last color threshold
+        // tickValues.push(legendMax); // Option 1: Tick at the very end
+        // Option 2: Add a sensible tick like 80 if max is >= 80
+         if (legendMax >= 80 && !tickValues.includes(80)) tickValues.push(80);
+    }
+    tickValues = [...new Set(tickValues)].sort((a,b) => a-b); // Unique and sorted
+      
     const legendAxis = d3.axisBottom(legendScale)
-      .tickValues([0, 5, 7.5, 10, 15, 20, 25])
+      .tickValues(tickValues) // Use dynamic tick values
       .tickFormat(d => d);
       
     // 添加图例矩形
-    legendDomain.unshift(0);
-    legendDomain.sort((a, b) => a - b); // Sort the domain array ascending
+    // Create segments based on color domain + 0 and legendMax
+    const legendSegments = [legendMin, ...colorDomain, legendMax].filter((v, i, a) => a.indexOf(v) === i).sort((a,b)=>a-b);
     
-    for (let i = 0; i < legendDomain.length; i++) {
+    for (let i = 0; i < legendSegments.length - 1; i++) {
+      const segmentStart = legendSegments[i];
+      const segmentEnd = legendSegments[i+1];
+      const xPos = legendScale(segmentStart);
+      let rectWidth = legendScale(segmentEnd) - xPos;
+      
+       // Ensure width is non-negative (should be fine with sorted segments)
+      if (rectWidth < 0) {
+          console.error(`Calculated negative legend rect width (${rectWidth}) for segment ${segmentStart}-${segmentEnd}. Skipping.`);
+          continue;
+      }
+      
+      // Determine color for this segment (use the color corresponding to the start value)
+      const segmentColor = this.colorScale(segmentStart);
+
       this.legendGroup.append('rect')
-        .attr('x', legendScale(legendDomain[i]))
+        .attr('x', xPos)
         .attr('y', 0)
-        .attr('width', i < legendDomain.length - 1 ? 
-          legendScale(legendDomain[i+1]) - legendScale(legendDomain[i]) : 
-          legendScale(25) - legendScale(legendDomain[i]))
+        .attr('width', rectWidth)
         .attr('height', legendHeight)
-        .attr('fill', i < legendColors.length ? legendColors[i] : legendColors[legendColors.length-1]);
+        .attr('fill', segmentColor);
     }
     
     // 添加图例轴

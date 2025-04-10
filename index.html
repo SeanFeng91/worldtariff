@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>全球关税数据可视化项目</title>
+  <title>全球关税数据</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   
   <!-- Remove Shards UI / Bootstrap -->
@@ -92,65 +92,92 @@
     .timeline-wrapper {
         display: flex;
         overflow-x: auto; 
-        padding: 30px 10px 40px 10px; 
+        padding: 20px 10px 50px 10px; 
         position: relative;
         width: 100%; 
         border-top: 1px solid #eee; 
         margin-top: 1rem;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f7fafc;
+    }
+    .timeline-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .timeline-wrapper::-webkit-scrollbar-track {
+        background: #f7fafc;
+    }
+    .timeline-wrapper::-webkit-scrollbar-thumb {
+        background-color: #cbd5e0;
+        border-radius: 3px;
     }
     .timeline-wrapper::before {
-        content: '';
+        content: none; /* 移除伪元素 */
+    }
+    .timeline-line {
         position: absolute;
         left: 0;
-        bottom: 20px; 
-        height: 2px;
+        bottom: 25px; 
+        height: 5px;
         width: 100%; 
-        background-color: #dee2e6; 
-        z-index: 1; 
+        background-color: #e2e8f0; 
+        z-index: 1;
     }
     .timeline-item {
         flex: 0 0 auto; 
         width: 220px; 
-        margin-right: 30px; 
+        margin-right: 40px; 
         position: relative;
-        padding-bottom: 30px; 
+        padding-bottom: 15px; 
         z-index: 2; 
     }
     .timeline-item::after {
         content: '';
         position: absolute;
-        bottom: 16px; 
+        bottom: -28px; /* 调整与线条的对齐，使点在线的中间 */
         left: 50%;
         transform: translateX(-50%);
-        width: 10px; 
-        height: 10px; 
-        background-color: #4299e1; /* Tailwind blue-500 */
-        border: 2px solid white;
+        width: 12px; 
+        height: 12px; 
+        background-color: #3b82f6; 
+        border: 3px solid white;
         border-radius: 50%;
-        z-index: 3; 
+        z-index: 3;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
+    }
+    .timeline-item:hover::after {
+        background-color: #2563eb;
+        transform: translateX(-50%) scale(1.2);
     }
      /* Use Tailwind for card inside timeline if needed, or keep simple */
      .timeline-item .timeline-card { 
          background-color: white;
-         border-radius: 0.375rem; /* rounded-md */
+         border-radius: 0.5rem; /* rounded-lg */
          border: 1px solid #e2e8f0; /* border-gray-300 */
-         padding: 0.8rem;
+         padding: 1rem;
          height: 100%;
-         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+         transition: transform 0.2s ease, box-shadow 0.2s ease;
+     }
+     .timeline-item:hover .timeline-card {
+         transform: translateY(-5px);
+         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
      }
      .timeline-item .timeline-card-title {
-         font-size: 0.85rem;
-         font-weight: 600; /* font-semibold */
-         margin-bottom: 0.3rem;
-         color: #4299e1; /* text-blue-500 */
+         font-size: 0.9rem;
+         font-weight: 700; /* font-bold */
+         margin-bottom: 0.5rem;
+         color: #2563eb; /* text-blue-600 */
      }
       .timeline-item .timeline-card-text {
-         font-size: 0.75rem;
-         color: #4a5568; /* text-gray-700 */
+         font-size: 0.8rem;
+         color: #1f2937; /* text-gray-800 */
+         line-height: 1.4;
+         margin-bottom: 0.5rem;
      }
       .timeline-item .timeline-card-details {
          font-size: 0.75rem;
-         color: #a0aec0; /* text-gray-500 */
+         color: #6b7280; /* text-gray-500 */
          font-style: italic;
      }
 
@@ -179,9 +206,9 @@
 
   <div class="container mx-auto px-4">
     <!-- Dashboard Header -->
-    <div class="py-4 mb-6">
-      <h3 class="text-2xl font-semibold text-gray-800">美国关税政策数据可视化仪表盘</h3>
-      <p class="text-sm text-gray-600 uppercase tracking-wide">全面展示全球贸易体系中的关税政策变化及各国应对措施</p>
+    <div class="py-4 mb-6 text-center">
+      <h3 class="text-2xl font-semibold text-gray-800 text-center">美国关税政策数据可视化</h3>
+      <p class="text-sm text-gray-600 uppercase tracking-wide text-center">全面展示全球贸易体系中的关税政策变化及各国应对措施</p>
     </div>
 
     <!-- Key Indicators using Tailwind Grid -->
@@ -227,6 +254,18 @@
       </div>
     </div>
 
+     <!-- Timeline Section -->
+     <div class="bg-white shadow rounded-lg mb-6">
+      <div class="p-4 border-b border-gray-200">
+        <h6 class="text-base font-semibold text-gray-800">美国对华关税事件时间轴</h6>
+      </div>
+      <div class="p-0"> <!-- Remove padding for wrapper -->
+        <div id="tariff-timeline" class="timeline-wrapper"> 
+           <p class="text-gray-500 p-4">加载时间轴数据...</p> 
+        </div>
+      </div>
+    </div>
+    
     <!-- Data Visualization Tabs using basic div structure and JS -->
     <div class="bg-white shadow rounded-lg mb-6">
       <div class="border-b border-gray-200">
@@ -398,17 +437,7 @@
       </div>
     </div>
 
-    <!-- Timeline Section -->
-    <div class="bg-white shadow rounded-lg mb-6">
-      <div class="p-4 border-b border-gray-200">
-        <h6 class="text-base font-semibold text-gray-800">关税事件时间轴</h6>
-      </div>
-      <div class="p-0"> <!-- Remove padding for wrapper -->
-        <div id="tariff-timeline" class="timeline-wrapper"> 
-           <p class="text-gray-500 p-4">加载时间轴数据...</p> 
-        </div>
-      </div>
-    </div>
+   
 
     <!-- New Section: Market Performance -->
     <div class="bg-white shadow rounded-lg mb-6">
@@ -718,7 +747,8 @@
                  return dateA - dateB;
             });
 
-            let timelineHTML = ''; 
+            // 添加时间轴线条
+            let timelineHTML = '<div class="timeline-line"></div>'; 
 
             sortedTimeline.forEach((event, index) => {
                 timelineHTML += `
@@ -734,6 +764,23 @@
             });
 
             timelineContainer.innerHTML = timelineHTML; 
+
+            // 调整时间轴线的长度
+            const timelineItems = timelineContainer.querySelectorAll('.timeline-item');
+            if (timelineItems.length > 0) {
+                const lastItem = timelineItems[timelineItems.length - 1];
+                const timelineLine = timelineContainer.querySelector('.timeline-line');
+                if (timelineLine && lastItem) {
+                    // 计算从第一个事件点左侧到最后一个事件点右侧的完整长度
+                    const firstItem = timelineItems[0];
+                    const containerPadding = 10; // 左边距
+                    const firstItemOffset = firstItem.offsetLeft;
+                    const lastItemOffset = lastItem.offsetLeft + lastItem.offsetWidth;
+                    // 设置线条的宽度并向左移动到第一个事件点的位置
+                    timelineLine.style.width = (lastItemOffset - firstItemOffset + 20) + 'px'; // 额外添加边距
+                    timelineLine.style.left = (firstItemOffset - 10) + 'px'; // 向左偏移以确保覆盖第一个点
+                }
+            }
 
         } catch (error) {
             console.error("Failed to load or render timeline:", error);
@@ -921,7 +968,7 @@
                         return response.json();
                     })
                     .then(data => {
-                        console.log(`Raw Alpha Vantage Response (${symbol} - ${functionToUse}):`, JSON.stringify(data, null, 2));
+                        // console.log(`Raw Alpha Vantage Response (${symbol} - ${functionToUse}):`, JSON.stringify(data, null, 2));
 
                         if (data.Note && data.Note.includes('API call frequency')) {
                             console.warn(`Alpha Vantage API call frequency limit reached for ${symbol}.`);

@@ -58,6 +58,9 @@ class TariffWorldMap {
     
     // 创建地图组
     this.mapGroup = this.svg.append('g');
+
+    // 创建欧盟标记组
+    this.euMarkerGroup = this.svg.append('g');
     
     // 创建标签组
     this.labelsGroup = this.svg.append('g');
@@ -101,6 +104,7 @@ class TariffWorldMap {
       this.drawMap();
       this.createLegend();
       this.setupTooltips();
+      this.addEUMarker(); // 添加欧盟标记
       
       console.log('世界关税地图数据加载完成');
     } catch (error) {
@@ -146,8 +150,15 @@ class TariffWorldMap {
           .attr('fill', d => {
               // **MODIFIED FILL LOGIC**
               const countryCode3 = d.id;
+              const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
               if (countryCode3 === 'USA') {
                   return '#cbd5e0'; // Neutral color (Tailwind gray-300) for the US itself
+              }
+              
+              // 检查是否为欧盟成员国
+              if (this.isEUMember(countryCode2)) {
+                  // 对欧盟成员国使用欧盟的关税率
+                  return this.colorScale(this.getUsTariffOnCountry(this.euData));
               }
               
               const country = countryTariffMap[countryCode3];
@@ -173,9 +184,17 @@ class TariffWorldMap {
           .attr('fill', d => {
               // **MODIFIED FILL LOGIC for UPDATE**
               const countryCode3 = d.id;
+              const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
               if (countryCode3 === 'USA') {
                   return '#cbd5e0'; // Neutral color for US
               }
+              
+              // 检查是否为欧盟成员国
+              if (this.isEUMember(countryCode2)) {
+                  // 对欧盟成员国使用欧盟的关税率
+                  return this.colorScale(this.getUsTariffOnCountry(this.euData));
+              }
+              
               const country = countryTariffMap[countryCode3];
               if (!country) {
                   return '#f7fafc'; // No data color
@@ -196,12 +215,80 @@ class TariffWorldMap {
   }
   
   /**
+   * 添加欧盟标记（跳动圆点）
+   */
+  addEUMarker() {
+    if (!this.euData || !this.euData.longitude || !this.euData.latitude) {
+      console.warn('欧盟数据不完整，无法添加标记');
+      return;
+    }
+
+    const euPosition = this.projection([this.euData.longitude, this.euData.latitude]);
+    
+    // 创建外圆
+    this.euMarkerGroup.append('circle')
+      .attr('cx', euPosition[0])
+      .attr('cy', euPosition[1])
+      .attr('r', 10)
+      .attr('fill', 'rgba(25, 99, 201, 0.3)')
+      .attr('stroke', 'rgba(25, 99, 201, 0.8)')
+      .attr('stroke-width', 1.5)
+      .attr('class', 'eu-marker-outer');
+    
+    // 创建内圆
+    this.euMarkerGroup.append('circle')
+      .attr('cx', euPosition[0])
+      .attr('cy', euPosition[1])
+      .attr('r', 5)
+      .attr('fill', 'rgba(25, 99, 201, 0.8)')
+      .attr('class', 'eu-marker-inner');
+    
+    // 添加动画效果
+    const pulseAnimation = () => {
+      this.euMarkerGroup.select('.eu-marker-outer')
+        .transition()
+        .duration(1500)
+        .attr('r', 15)
+        .style('opacity', 0.1)
+        .transition()
+        .duration(1500)
+        .attr('r', 10)
+        .style('opacity', 0.6)
+        .on('end', pulseAnimation);
+    };
+    
+    // 启动动画
+    pulseAnimation();
+    
+    // 添加鼠标事件
+    this.euMarkerGroup.selectAll('circle')
+      .on('mouseover', (event) => {
+        this.handleEUInteraction(true);
+        this.showTooltip(event, this.euData);
+      })
+      .on('mousemove', (event) => {
+        this.tooltip
+          .style('left', (event.pageX + 10) + 'px')
+          .style('top', (event.pageY - 20) + 'px');
+      })
+      .on('mouseout', () => {
+        this.handleEUInteraction(false);
+        this.hideTooltip();
+      })
+      .on('click', () => {
+        if (this.onCountryClick && this.euData) {
+          this.onCountryClick(this.euData);
+        }
+      });
+  }
+  
+  /**
    * 添加国家标签
    * @param {Object} countryTariffMap 国家关税数据映射
    */
   addCountryLabels(countryTariffMap) {
-    // 过滤主要国家
-    const majorCountries = this.tariffData.countries.filter(c => c.isMajor);
+    // 过滤主要国家，排除欧盟（因为欧盟已经有自己的标记）
+    const majorCountries = this.tariffData.countries.filter(c => c.isMajor && c.code !== 'EU');
     
     // 添加标签
     this.labelsGroup.selectAll('text')
@@ -216,24 +303,7 @@ class TariffWorldMap {
       .attr('font-weight', 'bold')
       .attr('text-anchor', 'middle')
       .attr('pointer-events', 'none')
-      .attr('fill', '#333')
-      .on('mouseover', (event, d) => { // Add mouseover for EU label
-           if (d.code === 'EU') {
-               this.handleEUInteraction(true); // Highlight EU members
-               this.showTooltip(event, this.euData); // Show EU tooltip
-           }
-       })
-       .on('mouseout', (event, d) => { // Add mouseout for EU label
-          if (d.code === 'EU') {
-               this.handleEUInteraction(false); // Remove highlight
-               this.hideTooltip(); // Hide tooltip
-           }
-       })
-       .on('click', (event, d) => { // Add click for EU label
-           if (d.code === 'EU' && this.onCountryClick) {
-               this.onCountryClick(this.euData);
-           }
-       });
+      .attr('fill', '#333');
   }
   
   /**
@@ -485,12 +555,43 @@ class TariffWorldMap {
       this.euData.memberCountries.forEach(memberCode => {
           const countryLayer = this.countryGeoMap[memberCode];
           if (countryLayer) {
-              d3.select(countryLayer).classed('highlighted-eu-member', highlight);
+              d3.select(countryLayer)
+                .classed('highlighted-eu-member', highlight)
+                .attr('stroke', highlight ? '#1963c9' : '#fff')
+                .attr('stroke-width', highlight ? 1.5 : 0.5);
+              
               if (highlight) {
                   d3.select(countryLayer).raise(); // Bring highlighted paths to front
               }
           }
       });
+      
+      // 如果高亮，同时让欧盟标记更明显
+      if (highlight) {
+          this.euMarkerGroup
+            .select('.eu-marker-inner')
+            .transition()
+            .duration(200)
+            .attr('r', 7);
+            
+          this.euMarkerGroup
+            .select('.eu-marker-outer')
+            .transition()
+            .duration(200)
+            .style('opacity', 0.9);
+      } else {
+          this.euMarkerGroup
+            .select('.eu-marker-inner')
+            .transition()
+            .duration(200)
+            .attr('r', 5);
+            
+          this.euMarkerGroup
+            .select('.eu-marker-outer')
+            .transition()
+            .duration(200)
+            .style('opacity', 0.6);
+      }
   }
   
   /**
@@ -520,7 +621,12 @@ class TariffWorldMap {
     // 创建国家数据映射
     const countryTariffMap = {};
     this.tariffData.countries.forEach(country => {
-      countryTariffMap[country.code] = country;
+      if (country.code3) {
+        countryTariffMap[country.code3] = country;
+      }
+      if (country.code === 'EU') {
+        this.euData = country;
+      }
     });
     
     // 更新国家颜色
@@ -528,14 +634,33 @@ class TariffWorldMap {
       .transition()
       .duration(750)
       .attr('fill', d => {
-        const countryCode = d.id;
-        const country = countryTariffMap[countryCode];
-        return country ? this.colorScale(this.getUsTariffOnCountry(country)) : '#f0f0f0';
+        const countryCode3 = d.id;
+        const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
+        
+        if (countryCode3 === 'USA') {
+          return '#cbd5e0';
+        }
+        
+        // 检查是否为欧盟成员国
+        if (this.isEUMember(countryCode2)) {
+          return this.colorScale(this.getUsTariffOnCountry(this.euData));
+        }
+        
+        const country = countryTariffMap[countryCode3];
+        if (!country) {
+          return '#f7fafc';
+        }
+        
+        return this.colorScale(this.getUsTariffOnCountry(country));
       });
       
     // 更新标签
     this.labelsGroup.selectAll('text').remove();
     this.addCountryLabels(countryTariffMap);
+    
+    // 更新欧盟标记
+    this.euMarkerGroup.selectAll('*').remove();
+    this.addEUMarker();
   }
   
   /**
@@ -563,6 +688,14 @@ class TariffWorldMap {
     this.labelsGroup.selectAll('text')
        .attr('x', d => this.projection([d.longitude, d.latitude])[0])
        .attr('y', d => this.projection([d.longitude, d.latitude])[1]);
+       
+    // 更新欧盟标记位置
+    if (this.euData) {
+      const euPosition = this.projection([this.euData.longitude, this.euData.latitude]);
+      this.euMarkerGroup.selectAll('circle')
+        .attr('cx', euPosition[0])
+        .attr('cy', euPosition[1]);
+    }
        
     // 更新图例位置
     this.legendGroup.attr('transform', `translate(40, ${this.height - 50})`);

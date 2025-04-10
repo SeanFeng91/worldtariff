@@ -879,13 +879,13 @@
     async function loadStockMarketData() {
         const container = document.getElementById('stock-market-card-content'); 
         const apiKey = '4TRF86KGQSIYB3D8'; 
-        // Keep only the symbols confirmed to work with TIME_SERIES_DAILY
+        // Use representative ETFs for indices where direct index symbols failed
         const symbols = {
             'S&P 500 (SPY)': 'SPY',
-            'Nasdaq (QQQ)': 'QQQ'
-           // 'DAX (DAX.DEX)': 'DAX.DEX', // Removed - Invalid API call
-           // 'Shanghai Comp (000001.SHH)': '000001.SHH', // Removed - Invalid API call
-           // 'Nikkei 225 (N225.TOK)': 'N225.TOK' // Removed - Invalid API call
+            'Nasdaq (QQQ)': 'QQQ',
+            'DAX (EXS1.DE)': 'EXS1.DE',      // DAX ETF (XETRA)
+            'China A50 (ASHR)': 'ASHR',   // CSI 300 ETF (US Listed)
+            'Japan (EWJ)': 'EWJ'         // MSCI Japan ETF (US Listed)
         };
         const outputSize = 'compact'; 
         const functionToUse = 'TIME_SERIES_DAILY';
@@ -901,19 +901,18 @@
                         return response.json();
                     })
                     .then(data => {
-                        // Log raw response for EACH symbol
                         console.log(`Raw Alpha Vantage Response (${symbol} - ${functionToUse}):`, JSON.stringify(data, null, 2));
 
                         if (data.Note && data.Note.includes('API call frequency')) {
                             console.warn(`Alpha Vantage API call frequency limit reached for ${symbol}.`);
                             return { name, data: null, error: 'API频率限制' };
                         }
-                        // Use the key confirmed to work for TIME_SERIES_DAILY
                         const timeSeriesKey = 'Time Series (Daily)'; 
-                        if (data['Error Message']) { // Check for explicit error message first
+                        if (data['Error Message']) { 
                              console.warn(`API Error for symbol ${symbol}: ${data['Error Message']}`);
+                             // Treat specific error messages differently if needed, otherwise show the message
                              return { name, data: null, error: data['Error Message'] };
-                         } else if (!data[timeSeriesKey]) { // Then check for the expected data key
+                         } else if (!data[timeSeriesKey]) { 
                             console.error(`Alpha Vantage error for ${symbol}: Expected key \'${timeSeriesKey}\' not found.`);
                             return { name, data: null, error: `数据格式无效或缺失key: ${timeSeriesKey}` };
                         }
@@ -922,7 +921,6 @@
                         const processedData = Object.entries(timeSeries)
                             .map(([date, values]) => ({
                                 date: new Date(date),
-                                // Use the correct key for closing price from TIME_SERIES_DAILY
                                 value: parseFloat(values['4. close'])
                             }))
                             .sort((a, b) => a.date - b.date); 

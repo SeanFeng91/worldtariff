@@ -754,19 +754,33 @@
       
       detailsTitle.textContent = countryData.name || '国家详情'; 
       
+      // **ADDED**: Ensure usTariffRateOnCountry is calculated if not passed
+      let usRateOnCountry = countryData.usTariffRateOnCountry;
+      if (usRateOnCountry === undefined) {
+          usRateOnCountry = calculateUsTariffOnCountry(countryData); 
+      }
+      
       let detailsHTML = '';
 
       // 1. US Tariff Information Section
       detailsHTML += `
         <div class="mb-4 pb-4 border-b border-gray-200">
           <h6 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">美国对该国主要关税措施</h6>
+          
+          // **MODIFIED: Use the ensured usRateOnCountry value**
           <p class="mb-1">
-            <strong class="text-red-600 text-lg">当前主要有效税率 (估算): ${countryData.tariffRate !== null ? countryData.tariffRate + '%' : 'N/A'}</strong> 
+            <strong class="text-red-600 text-lg">美国对其有效税率 (估算): ${usRateOnCountry !== undefined ? usRateOnCountry + '%' : 'N/A'}</strong> 
           </p>
-          ${countryData.details ? `<p class="text-xs text-gray-600 mb-2">说明: ${countryData.details}</p>` : ''}
+          
+          ${countryData.tariffRate !== null && countryData.tariffRate !== undefined ? 
+          `<p class="mb-1">
+            <strong class="text-blue-600 text-base">该国反制/平均税率: ${countryData.tariffRate}%</strong> 
+          </p>` : ''}
+          
+          ${countryData.details ? `<p class="text-xs text-gray-600 mt-1 mb-2">说明: ${countryData.details}</p>` : ''}
           
           ${ countryData.usTariffHistory && Array.isArray(countryData.usTariffHistory) && countryData.usTariffHistory.length > 0 ? `
-            <h6 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-3 mb-2">关税历史记录 (部分):</h6>
+            <h6 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-3 mb-2">美国对该国关税历史:</h6>
             <ul class="list-none pl-0 space-y-3">` + 
             countryData.usTariffHistory.map(action => `
               <li class="pb-2 border-b border-gray-100">
@@ -1088,6 +1102,47 @@
             container.innerHTML = `<p class="text-red-500 text-sm text-center">加载股市数据时出错: ${error.message}</p>`;
         }
     }
+
+    // --- Helper function to calculate US Tariff ON a country ---
+    function calculateUsTariffOnCountry(country) {
+       if (!country || country.code === 'US') return 0;
+
+       let usTariffRate = 10; // Default baseline
+
+       // Try history first
+       if (country.usTariffHistory && country.usTariffHistory.length > 0) {
+           let maxRateFound = 0;
+           country.usTariffHistory.forEach(entry => {
+               const textToSearch = (entry.description || '') + ' ' + (entry.details || '');
+               const rateMatch = textToSearch.match(/(\d{1,3})%/);
+               if (rateMatch) {
+                   const rate = parseInt(rateMatch[1], 10);
+                   if (rate > maxRateFound) maxRateFound = rate;
+               }
+           });
+           if (maxRateFound > 10) usTariffRate = maxRateFound;
+       }
+
+       // Fallback/Override by code
+       switch (country.code) {
+           case 'CN': usTariffRate = 125; break;
+           case 'CA': usTariffRate = 25; break;
+           case 'MX': usTariffRate = 25; break;
+           case 'EU': usTariffRate = 25; break;
+           case 'JP': usTariffRate = 24; break;
+           case 'IN': usTariffRate = 26; break;
+       }
+
+        // Special case for baseline countries if history is missing - simplified
+        if (usTariffRate === 10 && (!country.usTariffHistory || country.usTariffHistory.length === 0)) {
+             const detailsMatch = (country.details || '').match(/美国对.*?加征(\d{1,3})%/);
+             if (detailsMatch) {
+                 const rateFromDetails = parseInt(detailsMatch[1], 10);
+                 if (rateFromDetails !== 10) usTariffRate = rateFromDetails;
+             }
+        }
+       return usTariffRate;
+   }
 
   </script>
 

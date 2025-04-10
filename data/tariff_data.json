@@ -221,10 +221,16 @@
     "memberCountries": ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"],
     "usTariffHistory": [
       {
-        "date": "2025-04-02 (估算)",
-        "description": "美国对欧盟商品普遍加征关税至25%",
-        "details": "基于多家媒体报道，实际执行税率可能因商品不同而异，部分商品如钢铝、汽车税率可能更高或有单独规定。",
-        "effectiveDate": "2025-04-05 (或分阶段)"
+        "date": "2024 (至2025年初)",
+        "description": "拜登政府时期：暂停对欧盟钢铝关税，引入关税配额(TRQ)",
+        "details": "允许欧盟以历史水平出口钢铝，豁免部分产品，作为双方缓和贸易争端的措施。TRQ计划有效期至2025-03-31。",
+        "effectiveDate": "期间有效"
+      },
+      {
+          "date": "2025 (特朗普再次执政后，约2-3月宣布)",
+          "description": "美国宣布计划对欧盟商品普遍加征关税至25%",
+          "details": "涉及钢铁、铝、汽车、医药产品等。引发欧盟强烈不满和反制威胁（如对价值260亿欧元商品加税）。",
+          "effectiveDate": "2025-04 (或分阶段)"
       }
     ]
   },
@@ -254,37 +260,19 @@
     "longitude": 138.2529,
     "latitude": 36.2048,
     "isMajor": true,
-     "impact": "寻求通过外交途径解决，避免贸易战升级。",
+    "impact": "寻求通过外交途径解决，避免贸易战升级。",
      "usTariffHistory": [
         {
-            "date": "2024-04-02",
-            "description": "美国宣布对所有进口汽车及零部件永久征收25%关税",
-            "details": "特朗普总统宣布，旨在保护美国汽车产业。",
-            "effective_date": "2024-04-02"
-        },
-        {
-            "date": "2024-04-03",
-            "description": "美国宣布对日本征收24%的\"对等关税\"",
-            "details": "基于美国经济分析局计算的综合税率打折后得出。",
-            "effective_date": "2024-04-03"
-        },
-        {
-            "date": "2024-11-25",
-            "description": "美国扩大关税范围，对日本钢铝产品加征25%关税",
-            "details": "作为更广泛贸易调整的一部分。",
-            "effective_date": "2024-11-25"
-        },
-        {
-            "date": "2025-02-04",
-            "description": "美国海关在现有税率基础上再加征10%关税",
-            "details": "进一步增加日本出口成本。",
-            "effective_date": "2025-02-04"
-        },
-        {
             "date": "2025-04-02",
-            "description": "美国再次确认对日本进口汽车永久加征25%关税",
-            "details": "重申对汽车行业的关税政策。",
-            "effective_date": "2024-04-02"
+            "description": "美国签署行政令，对日本商品征收24%的对等关税",
+            "details": "基于美日贸易逆差设定，旨在减少贸易不平衡。",
+             "effectiveDate": "2025-04-09"
+        },
+        {
+            "date": "2025-04-02 (宣布，同日)",
+            "description": "美国宣布对所有进口汽车（包括日本）额外加征25%关税",
+            "details": "对日本汽车产业造成巨大冲击。",
+            "effectiveDate": "2025-04-03"
         }
      ]
   },
@@ -317,15 +305,9 @@
     "impact": "主要贸易伙伴间关税升级，影响北美自由贸易区。",
     "usTariffHistory": [
         {
-            "date": "2024-11-27 (宣布)",
-            "description": "美国宣布计划对加拿大商品普遍征收25%关税",
-            "details": "能源类商品税率为10%。取消800美元免税额度。",
-            "effectiveDate": "2025-02-04"
-        },
-        {
-            "date": "2025-02-04 (生效)",
-            "description": "美国对加拿大商品加征的25%/10%关税正式生效。",
-            "details": "普遍商品25%，能源类10%。",
+            "date": "2024-11 (宣布)",
+            "description": "美国宣布计划对加拿大大部分商品征收25%关税",
+            "details": "理由涉及非法移民和毒品问题。能源产品税率可能为10%。钢铝产品也适用25%关税（可能在此时间点或稍后明确）。",
             "effectiveDate": "2025-02-04"
         }
     ]
@@ -359,10 +341,16 @@
     "impact": "依赖与美贸易，受关税政策影响较大，寻求外交解决。",
     "usTariffHistory": [
         {
-            "date": "2025-04-02",
-            "description": "美国对不符USMCA原产地规则的墨西哥商品征收25%关税",
-            "details": "部分商品如汽车零部件可能有豁免或特殊规定。",
-            "effectiveDate": "2025-04-02"
+            "date": "2024-11 (宣布)",
+            "description": "美国宣布计划对不符USMCA规则的墨西哥商品征收25%关税",
+            "details": "理由涉及非法移民和毒品问题。部分商品如汽车零部件可能有豁免。",
+            "effectiveDate": "2025-02-01"
+        },
+        {
+            "date": "2025-03-04",
+            "description": "美国宣布将对墨西哥的25%关税永久执行",
+            "details": "确认了此前的关税计划。",
+            "effectiveDate": "2025-03-04"
         }
     ]
   },
@@ -395,10 +383,16 @@
      "impact": "在寻求外交解决方案，同时可能评估贸易影响。",
      "usTariffHistory": [
          {
-             "date": "2025-04-02 (估算)",
-             "description": "美国对印度商品平均关税提升至约26%",
-             "details": "作为对等关税政策的一部分，特定商品如钢铝、汽车税率可能不同。",
-             "effectiveDate": "2025-04-05 (或分阶段)"
+             "date": "2024年底 (特朗普时期或威胁)",
+             "description": "美国威胁若印度继续提高关税，将对其商品加征100%关税",
+             "details": "批评印度为'关税之王'，并取消了部分商品的普惠制待遇(GSP)。",
+             "effectiveDate": null
+         },
+         {
+             "date": "2025-03 (宣布)",
+             "description": "美国宣布将对印度实施'对等关税'政策",
+             "details": "税率可能参考印度对其他国家（如中国）的税率，或设定为26%左右的平均税率。旨在平衡贸易，对印度药品、农产品、制造业等产生冲击。",
+             "effectiveDate": "2025-04-02 (或稍后)"
          }
      ]
   },
@@ -582,8 +576,8 @@
     "code": "MY",
     "code3": "MYS",
     "region": "东南亚",
-    "tariffRate": 24,
-    "details": "对美加征24%关税",
+    "tariffRate": null,
+    "details": "美国对马来西亚加征24%关税",
     "agricultureTariff": null,
     "industrialTariff": null,
     "highestTariff": null,
@@ -610,8 +604,8 @@
     "code": "TH",
     "code3": "THA",
     "region": "东南亚",
-    "tariffRate": 36,
-    "details": "对美加征36%关税",
+    "tariffRate": null,
+    "details": "美国对泰国加征36%关税",
     "agricultureTariff": null,
     "industrialTariff": null,
     "highestTariff": null,
@@ -638,8 +632,8 @@
     "code": "ID",
     "code3": "IDN",
     "region": "东南亚",
-    "tariffRate": 32,
-    "details": "对美加征32%关税",
+    "tariffRate": null,
+    "details": "美国对印尼加征32%关税",
     "agricultureTariff": null,
     "industrialTariff": null,
     "highestTariff": null,

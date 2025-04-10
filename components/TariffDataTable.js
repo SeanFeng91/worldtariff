@@ -23,13 +23,13 @@ class TariffDataTable {
     this.searchQuery = '';
     this.onRowClick = config.onRowClick || null;
     
-    // 默认列配置
+    // **UPDATED Default Columns**: Added 'usTariffOnCountry', adjusted widths/labels
     this.columns = config.columns || [
       { field: 'name', label: '国家/地区', sortable: true, width: '20%' },
-      { field: 'tariffRate', label: '关税率(%)', sortable: true, width: '15%', type: 'number' },
-      { field: 'response', label: '反制措施', sortable: false, width: '35%', type: 'array' },
-      { field: 'effectiveDate', label: '生效日期', sortable: true, width: '15%', type: 'date' },
-      { field: 'yearChange', label: '同比变化', sortable: true, width: '15%', type: 'change' }
+      { field: 'tariffRate', label: '对美反制/平均税率(%)', sortable: true, width: '18%', type: 'number' },
+      { field: 'usTariffOnCountry', label: '美国对其税率(%)', sortable: true, width: '18%', type: 'usTariff' },
+      { field: 'response', label: '反制措施', sortable: false, width: '30%', type: 'array' },
+      { field: 'effectiveDate', label: '最新生效日期', sortable: true, width: '14%', type: 'date' }
     ];
     
     // 区域分组
@@ -406,17 +406,11 @@ class TariffDataTable {
       const jsonData = await response.json();
       this.data = jsonData.countries;
       
-      // 添加同比变化数据（模拟数据）
-      this.data.forEach(country => {
-        country.yearChange = Math.random() > 0.5 ? 
-          Math.round(Math.random() * 10 * 10) / 10 : 
-          -Math.round(Math.random() * 5 * 10) / 10;
-          
-        // 添加生效日期（模拟数据）
-        const date = new Date();
-        date.setDate(date.getDate() - Math.floor(Math.random() * 60));
-        country.effectiveDate = date.toISOString().split('T')[0];
-      });
+      // **REMOVED**: Mock data generation for yearChange and effectiveDate
+      // this.data.forEach(country => {
+      //   country.yearChange = ...;
+      //   country.effectiveDate = ...;
+      // });
       
       // 过滤和渲染数据
       this.filterAndRenderData();
@@ -524,7 +518,7 @@ class TariffDataTable {
     
     // 无数据处理
     if (pageData.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${this.columns.length}" class="loading">没有匹配的数据</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${this.columns.length}" class="loading">没有匹配的数据</td></tr>`; // Adjusted colspan
       return;
     }
     
@@ -564,18 +558,23 @@ class TariffDataTable {
             break;
             
           case 'date':
-            cell.textContent = country[column.field] || '-';
+            // **MODIFIED**: Get latest date from response or usTariffHistory
+            let latestDate = null;
+            if (country.response && country.response.length > 0) {
+                const dates = country.response.map(r => r.effectiveDate).filter(Boolean);
+                if (dates.length > 0) latestDate = dates.sort().reverse()[0];
+            }
+            if (!latestDate && country.usTariffHistory && country.usTariffHistory.length > 0) {
+                const dates = country.usTariffHistory.map(h => h.effectiveDate).filter(Boolean);
+                 if (dates.length > 0) latestDate = dates.sort().reverse()[0];
+            }
+            cell.textContent = latestDate || '-';
             break;
             
-          case 'change':
-            const change = country[column.field];
-            const isPositive = change > 0;
-            cell.innerHTML = `
-              <span class="${isPositive ? 'tariff-change-positive' : 'tariff-change-negative'}">
-                ${isPositive ? '+' : ''}${change}%
-              </span>
-            `;
-            break;
+          case 'usTariff':
+             const usRate = this.getUsTariffOnCountry(country);
+             cell.textContent = usRate > 0 ? `${usRate}` : '-';
+             break;
             
           default:
             cell.textContent = country[column.field] || '-';
@@ -749,6 +748,58 @@ class TariffDataTable {
     this.searchQuery = query;
     this.currentPage = 1;
     this.filterAndRenderData();
+  }
+  
+  /**
+   * Helper: Calculate or retrieve the US tariff rate imposed ON a specific country.
+   * Mirrors the logic in TariffWorldMap.js.
+   * @param {Object} country Country data object from tariff_data.json
+   * @returns {number} The applicable US tariff rate on this country.
+   */
+  getUsTariffOnCountry(country) {
+      if (!country || country.code === 'US') return 0; // No self-tariff
+
+      let usTariffRate = 10; // Default to baseline
+
+      // Try to extract from history first
+      if (country.usTariffHistory && country.usTariffHistory.length > 0) {
+          let maxRateFound = 0;
+          country.usTariffHistory.forEach(entry => {
+              const textToSearch = (entry.description || '') + ' ' + (entry.details || '');
+              const rateMatch = textToSearch.match(/(\d{1,3})%/);
+              if (rateMatch) {
+                  const rate = parseInt(rateMatch[1], 10);
+                  if (rate > maxRateFound) maxRateFound = rate;
+              }
+          });
+          if (maxRateFound > 10) usTariffRate = maxRateFound;
+      }
+
+      // Fallback/Override logic based on country code
+      switch (country.code) {
+          case 'CN': usTariffRate = 125; break;
+          case 'CA': usTariffRate = 25; break;
+          case 'MX': usTariffRate = 25; break;
+          case 'EU': usTariffRate = 25; break;
+          case 'JP': usTariffRate = 24; break;
+          case 'IN': usTariffRate = 26; break;
+          // Add other specific country codes here if needed
+      }
+      
+      // Special case for countries like SG, NZ where US imposed 10% baseline but history might be empty
+       if (usTariffRate === 10 && (!country.usTariffHistory || country.usTariffHistory.length === 0)) {
+            // Check details field for confirmation of US rate if history is missing
+            const detailsMatch = (country.details || '').match(/美国对.*?加征(\d{1,3})%/);
+            if (detailsMatch) {
+                const rateFromDetails = parseInt(detailsMatch[1], 10);
+                // Only update if details explicitly state a rate different from baseline
+                if (rateFromDetails !== 10) { 
+                    usTariffRate = rateFromDetails;
+                }
+            }
+       }
+
+      return usTariffRate;
   }
 }
 

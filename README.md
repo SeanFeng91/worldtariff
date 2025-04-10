@@ -1,36 +1,72 @@
+
 # 全球关税数据可视化项目
 
-这是一个用于展示全球关税数据和各国反制措施的可视化项目。
+## 项目简介
 
-## 文件结构
+这是一个专注于展示全球关税政策和各国反制措施的可视化平台。项目通过直观的地图、图表和数据表格，帮助用户了解美国关税政策及其对全球贸易体系的影响。
 
-- `tariff_dashboard.html` - 主要仪表盘界面，提供关税数据的综合展示
-- `tariff_map.html` - 基于地图的关税数据可视化界面
-- `components/` - 包含用于数据可视化的JavaScript组件
-  - `TariffWorldMap.js` - 基于D3.js的世界地图组件
-  - `TariffBarChart.js` - 柱状图组件，用于比较各国关税率
-  - `TariffDataTable.js` - 数据表格组件，用于详细展示关税数据
-- `data/` - 包含关税数据的JSON文件
-  - `tariff_data.json` - 主要关税数据
-  - `tariff_map_data.json` - 用于地图可视化的数据
-  - `tariff_data_2025update.md` - 数据更新文档
+## 功能特点
+
+- **世界关税地图**：通过交互式世界地图直观展示各国关税情况
+- **关税数据表格**：详细列出各国关税详情和反制措施
+- **柱状图比较**：直观对比主要贸易伙伴的关税率
+- **时间轴展示**：跟踪美国对华关税政策的历史变化
+- **详情面板**：点击国家可查看详细的关税政策和反制措施
+- **趋势分析**：展示区域关税变化和各类反制措施使用情况
+
+## 项目结构
+
+```
+/
+├── index.html            # 主页面
+├── components/           # 可视化组件
+│   ├── TariffWorldMap.js   # 世界地图组件
+│   ├── TariffBarChart.js   # 柱状图组件
+│   └── TariffDataTable.js  # 数据表格组件
+├── data/                 # 数据文件
+│   └── tariff_data.json    # 关税数据
+└── favicon.ico           # 网站图标
+```
+
+## 技术栈
+
+- **HTML5/CSS3** - 页面结构和样式
+- **JavaScript** - 交互逻辑
+- **Tailwind CSS** - 界面样式和组件
+- **D3.js** - 数据可视化图表
+- **Leaflet.js** - 交互式地图
 
 ## 如何使用
 
-1. 启动本地服务器：
+1. **克隆项目**：
+   ```bash
+   git clone [项目仓库URL]
+   cd 全球关税数据可视化项目
+   ```
 
-```bash
-python -m http.server 8000
-```
+2. **启动本地服务器**：
+   ```bash
+   # 使用Python启动简易服务器
+   python -m http.server 8000
+   # 或使用Node.js的http-server
+   npx http-server
+   ```
 
-2. 在浏览器中访问：
+3. **在浏览器中访问**：
+   - 打开浏览器，访问 `http://localhost:8000`
 
-- 仪表盘页面：http://localhost:8000/tariff_dashboard.html
-- 地图页面：http://localhost:8000/tariff_map.html
+## 数据说明
 
-## 数据格式
+项目使用`data/tariff_data.json`存储关税数据，包含：
 
-### tariff_data.json
+- 全球关税概览数据
+- 各国具体关税率信息
+- 各国对美国关税政策的反制措施
+- 关税事件时间轴数据
+- 区域关税变化情况
+- 各类反制措施使用趋势
+
+数据格式示例：
 
 ```json
 {
@@ -38,21 +74,19 @@ python -m http.server 8000
     "averageTariff": 13.5,
     "highestTariff": {
       "country": "中国",
-      "rate": 25
-    },
-    "responseCountries": 12
+      "rate": 25,
+      "targetSectors": "电子产品、机械设备"
+    }
   },
   "countries": [
     {
       "name": "中国",
       "code": "CN",
-      "region": "亚洲",
       "tariffRate": 7.5,
       "response": [
         {
           "type": "关税反制",
-          "details": "对美国农产品和汽车加征25%的关税",
-          "effectiveDate": "2025-01-15",
+          "details": "对美国农产品加征25%关税",
           "targetedSectors": ["农业", "汽车制造"]
         }
       ]
@@ -61,52 +95,16 @@ python -m http.server 8000
 }
 ```
 
-### tariff_map_data.json
+## 定制与扩展
 
-```json
-{
-  "countries": [
-    {
-      "name": "美国",
-      "code": "US",
-      "center": [37.0902, -95.7129],
-      "policy": "对等关税政策",
-      "measures": [
-        {
-          "type": "全球基准关税",
-          "rate": "10%",
-          "target": "所有进口商品",
-          "date": "2025-04-02"
-        }
-      ]
-    },
-    {
-      "name": "中国",
-      "code": "CN",
-      "center": [35.8617, 104.1954],
-      "targets": [
-        {
-          "rate": "25%",
-          "products": "价值500亿美元的半导体、关键矿产和医疗设备",
-          "date": "2025-03-15"
-        }
-      ],
-      "responses": [
-        {
-          "type": "精准反制",
-          "content": "对同等价值的美国高科技产品加征25-30%关税",
-          "date": "2025-03-20"
-        }
-      ]
-    }
-  ]
-}
-```
+- 更新`data/tariff_data.json`以反映最新的关税数据
+- 在`components/`目录添加新的可视化组件
+- 修改`index.html`中的样式以适应不同的展示需求
 
-## 技术栈
+## 浏览器兼容性
 
-- HTML5/CSS3
-- JavaScript
-- D3.js - 用于数据可视化
-- Leaflet.js - 用于地图可视化
-- Tailwind CSS - 用于界面样式 
+项目支持所有现代浏览器（Chrome、Firefox、Safari、Edge等），需要启用JavaScript。
+
+---
+
+*数据最后更新：2025年4月10日*

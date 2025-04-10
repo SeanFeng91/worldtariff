@@ -22,14 +22,16 @@ class TariffWorldMap {
     this.margins = config.margins || { top: 20, right: 20, bottom: 60, left: 20 };
     this.onCountryClick = config.onCountryClick || null;
     
-    // 颜色比例尺 - 调整阈值以适应新的税率范围 (e.g., 0-84%)
+    // 颜色比例尺 - **UPDATED** to reflect US tariffs ON others (10% to 125%)
     this.colorScale = d3.scaleThreshold()
-      .domain([5, 10, 15, 25, 50, 75]) // Adjusted thresholds
-      .range(d3.schemeReds[7]); // Keep 7 levels
+      .domain([10, 15, 25, 30, 50, 100]) // Example thresholds up to 125
+      .range(d3.schemeReds[7]); // Use 7 shades of red
     
     // 数据
     this.worldData = null;
     this.tariffData = null;
+    this.countryGeoMap = {}; // Map ISO A3/A2 codes to GeoJSON features/layers
+    this.euData = null; // Store EU specific data for quick access
     
     // 初始化
     this.init();
@@ -120,6 +122,13 @@ class TariffWorldMap {
     this.tariffData.countries.forEach(country => {
       if (country.code3) { // Use code3 if available
           countryTariffMap[country.code3] = country;
+          this.countryGeoMap[country.code3] = null; // Initialize map entry
+      }
+      if (country.code) { // Also map by code2 (ISO A2)
+          this.countryGeoMap[country.code] = null;
+      }
+      if (country.code === 'EU') {
+          this.euData = country; // Store EU data separately
       }
     });
     
@@ -132,12 +141,29 @@ class TariffWorldMap {
           .attr('stroke', '#fff')
           .attr('stroke-width', 0.5)
           .attr('class', 'country')
-          .attr('data-country-code3', d => d.id) // Store alpha-3 code
+          .attr('data-country-code3', d => d.id) // Store alpha-3 code (e.g., 'USA')
+          .attr('data-country-code2', d => d.properties.iso_a2_eh || d.properties.iso_a2) // Store alpha-2 code (e.g., 'US')
           .attr('fill', d => {
-            const country = countryTariffMap[d.id]; // Match using alpha-3 (d.id)
-            // Use a specific color for US, otherwise use scale or default
-            if (d.id === 'USA') return '#6b7280'; // Gray for US
-            return country ? this.colorScale(country.tariffRate) : '#f0f0f0'; // Default light gray
+              // **MODIFIED FILL LOGIC**
+              const countryCode3 = d.id;
+              if (countryCode3 === 'USA') {
+                  return '#cbd5e0'; // Neutral color (Tailwind gray-300) for the US itself
+              }
+              
+              const country = countryTariffMap[countryCode3];
+              if (!country) {
+                  return '#f7fafc'; // Very light gray (Tailwind gray-100) for countries with no data
+              }
+              
+              // Determine the US tariff rate ON this country
+              const usTariffRateOnCountry = this.getUsTariffOnCountry(country);
+              return this.colorScale(usTariffRateOnCountry); // Color based on US tariff ON the country
+          })
+          .each((d, i, nodes) => {
+              // Populate the countryGeoMap with references to the path elements
+              if (d.id) this.countryGeoMap[d.id] = nodes[i];
+              const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
+              if (countryCode2) this.countryGeoMap[countryCode2] = nodes[i];
           })
           .on('mouseover', this.handleMouseOver.bind(this))
           .on('mousemove', this.handleMouseMove.bind(this))
@@ -145,9 +171,17 @@ class TariffWorldMap {
           .on('click', this.handleClick.bind(this)),
         update => update // How to update existing paths
           .attr('fill', d => {
-            const country = countryTariffMap[d.id];
-            if (d.id === 'USA') return '#6b7280';
-            return country ? this.colorScale(country.tariffRate) : '#f0f0f0';
+              // **MODIFIED FILL LOGIC for UPDATE**
+              const countryCode3 = d.id;
+              if (countryCode3 === 'USA') {
+                  return '#cbd5e0'; // Neutral color for US
+              }
+              const country = countryTariffMap[countryCode3];
+              if (!country) {
+                  return '#f7fafc'; // No data color
+              }
+              const usTariffRateOnCountry = this.getUsTariffOnCountry(country);
+              return this.colorScale(usTariffRateOnCountry);
           })
           // Re-attach event listeners if needed, though D3 join usually handles this
           .on('mouseover', this.handleMouseOver.bind(this))
@@ -182,7 +216,24 @@ class TariffWorldMap {
       .attr('font-weight', 'bold')
       .attr('text-anchor', 'middle')
       .attr('pointer-events', 'none')
-      .attr('fill', '#333');
+      .attr('fill', '#333')
+      .on('mouseover', (event, d) => { // Add mouseover for EU label
+           if (d.code === 'EU') {
+               this.handleEUInteraction(true); // Highlight EU members
+               this.showTooltip(event, this.euData); // Show EU tooltip
+           }
+       })
+       .on('mouseout', (event, d) => { // Add mouseout for EU label
+          if (d.code === 'EU') {
+               this.handleEUInteraction(false); // Remove highlight
+               this.hideTooltip(); // Hide tooltip
+           }
+       })
+       .on('click', (event, d) => { // Add click for EU label
+           if (d.code === 'EU' && this.onCountryClick) {
+               this.onCountryClick(this.euData);
+           }
+       });
   }
   
   /**
@@ -194,15 +245,15 @@ class TariffWorldMap {
     const legendColors = this.colorScale.range();
     // Get the actual domain thresholds used in the color scale
     const colorDomain = this.colorScale.domain(); 
-    // Define the legend scale domain based on actual data range (0 to max threshold or a bit beyond)
-    const legendMin = 0;
-    const legendMax = Math.max(80, colorDomain[colorDomain.length - 1] + 5); // Go up to at least 80 or slightly above the max threshold
+    // Define the legend scale domain based on actual data range (0 or 10 up to max tariff 125)
+    const legendMin = 10; // Start legend at baseline tariff
+    const legendMax = 130; // Go slightly beyond the max 125
     
     // 创建图例标题
     this.legendGroup.append('text')
       .attr('x', 0)
       .attr('y', -10)
-      .text('关税率 (%)')
+      .text('美国对其关税率 (%)') // **UPDATED TITLE**
       .attr('font-size', '12px')
       .attr('font-weight', 'bold');
     
@@ -212,7 +263,7 @@ class TariffWorldMap {
       .range([0, legendWidth]);
       
     // Generate tick values based on the color scale domain, plus 0 and potentially max
-    let tickValues = [0, ...colorDomain]; 
+    let tickValues = [10, 25, 50, 100, 125]; 
     if (legendMax > colorDomain[colorDomain.length - 1]) {
         // Add a tick near the max if it extends beyond the last color threshold
         // tickValues.push(legendMax); // Option 1: Tick at the very end
@@ -222,7 +273,7 @@ class TariffWorldMap {
     tickValues = [...new Set(tickValues)].sort((a,b) => a-b); // Unique and sorted
       
     const legendAxis = d3.axisBottom(legendScale)
-      .tickValues(tickValues) // Use dynamic tick values
+      .tickValues([10, 25, 50, 100, 125]) // **UPDATED TICKS** Example: Focus on key rates
       .tickFormat(d => d);
       
     // 添加图例矩形
@@ -268,36 +319,80 @@ class TariffWorldMap {
   }
   
   /**
-   * 处理鼠标悬停事件
-   * @param {Event} event 事件对象
-   * @param {Object} d 数据对象 (GeoJSON feature)
+   * 显示提示框
+   * @param {Event} event 鼠标事件
+   * @param {Object} countryData 国家数据
    */
-  handleMouseOver(event, d) {
-    // 查找国家数据 using GeoJSON ID (alpha-3)
-    const countryCode3 = d.id;
-    const country = this.tariffData.countries.find(c => c.code3 === countryCode3);
+  showTooltip(event, countryData) {
+    if (!countryData) return;
     
-    if (!country) return; // Don't show tooltip if no data
+    let tooltipHtml = `<strong>${countryData.name}</strong><br/>`;
     
-    // 高亮国家
-    d3.select(event.currentTarget)
-      .attr('stroke', '#333')
-      .attr('stroke-width', 1.5);
+    // **MODIFIED Tooltip Content**
+    if (countryData.code === 'US') {
+        // Special tooltip for US - maybe show count of countries targeting it?
+        const targetingCountries = this.tariffData.countries.filter(c => c.response && c.response.length > 0);
+        tooltipHtml += `<small>被 ${targetingCountries.length} 个主要经济体采取反制措施</small>`;
+    } else {
+        const usTariffRate = this.getUsTariffOnCountry(countryData);
+        tooltipHtml += `美国对其关税率: ${usTariffRate}%<br/>`;
+        
+        if (countryData.tariffRate !== null && countryData.tariffRate !== undefined) {
+            tooltipHtml += `该国对美反制/平均税率: ${countryData.tariffRate}%<br/>`;
+        } else {
+            // tooltipHtml += `该国对美反制/平均税率: N/A<br/>`;
+        }
+        if (countryData.response && countryData.response.length > 0) {
+            tooltipHtml += `<small>有 ${countryData.response.length} 项反制措施</small>`;
+        } else {
+            tooltipHtml += `<small>无记录的反制措施</small>`;
+        }
+    }
+
+    this.tooltip.transition()
+      .duration(100)
+      .style('opacity', 0.95);
       
-    // 显示提示框
+    this.tooltip.html(tooltipHtml)
+      .style('left', (event.pageX + 15) + 'px')
+      .style('top', (event.pageY - 28) + 'px');
+  }
+  
+  /**
+   * 隐藏提示框
+   */
+  hideTooltip() {
     this.tooltip.transition()
       .duration(200)
-      .style('opacity', 0.9);
-      
-    // 设置提示框内容 (add details)
-    this.tooltip.html(`
-      <div style="font-weight: bold; margin-bottom: 5px;">${country.name}</div>
-      <div>税率: <span style="font-weight: bold;">${country.tariffRate !== null ? country.tariffRate + '%' : 'N/A'}</span></div>
-      ${country.details ? `<div style="font-size: 11px; color: #555; margin-top: 3px;">${country.details}</div>` : ''}
-      <div style="margin-top: 8px; font-size: 11px; border-top: 1px solid #eee; padding-top: 5px;">
-        ${this.getResponseHtml(country.response)}
-      </div>
-    `);
+      .style('opacity', 0);
+  }
+  
+  /**
+   * 处理鼠标悬停事件
+   * @param {Event} event 鼠标事件
+   * @param {Object} d GeoJSON 数据点
+   */
+  handleMouseOver(event, d) {
+    d3.select(event.currentTarget).raise(); // Bring path to front
+    const countryCode3 = d.id;
+    const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
+    const countryData = this.findCountryData(countryCode3); 
+    
+    if (this.isEUMember(countryCode2)) {
+        this.handleEUInteraction(true); // Highlight all EU members
+        // For EU tooltip, get the specific EU data object
+        const euDataObject = this.tariffData.countries.find(c => c.code === 'EU') || {}; 
+        this.showTooltip(event, euDataObject); // Show EU data in tooltip
+    } else {
+        this.handleEUInteraction(false); // Ensure EU is not highlighted if hovering over non-EU
+        this.showTooltip(event, countryData); // Show data for the specific country
+         // Apply hover style only to non-EU countries directly hovered
+         if (countryCode3 !== 'USA') { // Don't apply stroke to US itself
+             d3.select(event.currentTarget)
+               .attr('stroke', '#333')
+               .attr('stroke-width', 1);
+         }
+    }
   }
   
   /**
@@ -312,34 +407,90 @@ class TariffWorldMap {
   
   /**
    * 处理鼠标离开事件
-   * @param {Event} event 事件对象
+   * @param {Event} event 鼠标事件
    */
   handleMouseOut(event) {
-    // 恢复国家样式
-    d3.select(event.currentTarget)
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 0.5);
-      
-    // 隐藏提示框
-    this.tooltip.transition()
-      .duration(500)
-      .style('opacity', 0);
+    const countryCode2 = d3.select(event.currentTarget).attr('data-country-code2');
+    
+    if (this.isEUMember(countryCode2)) {
+        this.handleEUInteraction(false); // Remove highlight from all EU members
+    } else {
+        // Only reset non-EU country style if EU wasn't highlighted
+         d3.select(event.currentTarget)
+           .attr('stroke', '#fff')
+           .attr('stroke-width', 0.5);
+    }
+    this.hideTooltip();
   }
   
   /**
    * 处理点击事件
-   * @param {Event} event 事件对象
-   * @param {Object} d 数据对象 (GeoJSON feature)
+   * @param {Event} event 鼠标事件
+   * @param {Object} d GeoJSON 数据点
    */
   handleClick(event, d) {
     if (this.onCountryClick) {
-      // Find the country data using GeoJSON ID (alpha-3)
       const countryCode3 = d.id;
-      const countryData = this.tariffData.countries.find(c => c.code3 === countryCode3);
-      if (countryData) {
-          this.onCountryClick(countryData); // Pass the data object from tariff_data.json
+      const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
+      let countryData;
+
+      if (this.isEUMember(countryCode2)) {
+          countryData = this.euData; // If clicked on an EU member, show EU details
+      } else {
+          countryData = this.findCountryData(countryCode3);
       }
+      
+      if (countryData) {
+          this.onCountryClick(countryData);
+      } else {
+           console.warn(`未找到国家数据: ${countryCode3}`);
+      }
+      
+      // Add the calculated US tariff rate to the data passed to the click handler
+       if (countryData && countryData.code !== 'US') { 
+           countryData.usTariffRateOnCountry = this.getUsTariffOnCountry(countryData);
+       }
+       
+       if (countryData) {
+          this.onCountryClick(countryData);
+       }
     }
+  }
+  
+  /**
+   * Helper to find country data by ISO A3 code
+   * @param {string} code3 ISO A3 code
+   * @returns {Object|null} Country data or null
+   */
+  findCountryData(code3) {
+      return this.tariffData.countries.find(c => c.code3 === code3) || null;
+  }
+  
+  /**
+   * Helper to check if a country code (ISO A2) is an EU member
+   * @param {string} code2 ISO A2 code
+   * @returns {boolean}
+   */
+  isEUMember(code2) {
+      return this.euData && this.euData.memberCountries && this.euData.memberCountries.includes(code2);
+  }
+  
+  /**
+   * Helper to apply/remove highlighting for EU members
+   * @param {boolean} highlight True to highlight, false to remove
+   */
+  handleEUInteraction(highlight) {
+      if (!this.euData || !this.euData.memberCountries) return;
+
+      this.euData.memberCountries.forEach(memberCode => {
+          const countryLayer = this.countryGeoMap[memberCode];
+          if (countryLayer) {
+              d3.select(countryLayer).classed('highlighted-eu-member', highlight);
+              if (highlight) {
+                  d3.select(countryLayer).raise(); // Bring highlighted paths to front
+              }
+          }
+      });
   }
   
   /**
@@ -379,7 +530,7 @@ class TariffWorldMap {
       .attr('fill', d => {
         const countryCode = d.id;
         const country = countryTariffMap[countryCode];
-        return country ? this.colorScale(country.tariffRate) : '#f0f0f0';
+        return country ? this.colorScale(this.getUsTariffOnCountry(country)) : '#f0f0f0';
       });
       
     // 更新标签
@@ -415,6 +566,44 @@ class TariffWorldMap {
        
     // 更新图例位置
     this.legendGroup.attr('transform', `translate(40, ${this.height - 50})`);
+  }
+  
+  /**
+   * Helper: Calculate or retrieve the US tariff rate imposed ON a specific country.
+   * Mirrors the logic in TariffBarChart.js's processDataForChart.
+   * @param {Object} country Country data object from tariff_data.json
+   * @returns {number} The applicable US tariff rate on this country.
+   */
+  getUsTariffOnCountry(country) {
+      if (!country || country.code === 'US') return 0; // No self-tariff
+
+      let usTariffRate = 10; // Default to baseline
+
+      // Try to extract from history first (using the same simple parsing as barchart)
+      if (country.usTariffHistory && country.usTariffHistory.length > 0) {
+          let maxRateFound = 0;
+          country.usTariffHistory.forEach(entry => {
+              const textToSearch = (entry.description || '') + ' ' + (entry.details || '');
+              const rateMatch = textToSearch.match(/(\d{1,3})%/);
+              if (rateMatch) {
+                  const rate = parseInt(rateMatch[1], 10);
+                  if (rate > maxRateFound) maxRateFound = rate;
+              }
+          });
+          if (maxRateFound > 10) usTariffRate = maxRateFound;
+      }
+
+      // Fallback/Override logic based on country code
+      switch (country.code) {
+          case 'CN': usTariffRate = 125; break;
+          case 'CA': usTariffRate = 25; break;
+          case 'MX': usTariffRate = 25; break;
+          case 'EU': usTariffRate = 25; break;
+          case 'JP': usTariffRate = 24; break;
+          case 'IN': usTariffRate = 26; break;
+      }
+      
+      return usTariffRate;
   }
 }
 

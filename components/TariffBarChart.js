@@ -23,7 +23,7 @@ class TariffBarChart {
     
     // 数据
     this.data = null;
-    this.sortedCountries = null;
+    this.processedChartData = null;
     
     // 颜色比例尺
     this.colorScale = d3.scaleThreshold()
@@ -69,7 +69,7 @@ class TariffBarChart {
       .attr('text-anchor', 'middle')
       .attr('font-size', '16px')
       .attr('font-weight', 'bold')
-      .text('各国关税率对比');
+      .text('美国对主要贸易伙伴关税率对比');
       
     // 创建Y轴标签
     this.svg.append('text')
@@ -107,10 +107,9 @@ class TariffBarChart {
       const response = await d3.json(this.dataPath);
       this.data = response;
       
-      // 提取并排序国家数据
-      this.sortedCountries = [...this.data.countries]
-        .sort((a, b) => b.tariffRate - a.tariffRate);
-        
+      // 提取并排序国家数据 - **MODIFIED LOGIC**
+      this.processedChartData = this.processDataForChart(this.data.countries);
+      
       this.drawChart();
       
       console.log('关税柱状图数据加载完成');
@@ -120,16 +119,96 @@ class TariffBarChart {
   }
   
   /**
+   * Process country data specifically for this bar chart's purpose
+   * (Showing US tariffs ON other countries)
+   * @param {Array} countries Original country data array
+   * @returns {Array} Processed data array for the chart
+   */
+  processDataForChart(countries) {
+      const usTariffsOnCountries = countries
+          .filter(c => c.code !== 'US') // Exclude the US itself
+          .map(country => {
+              let usTariffRate = 10; // Default to baseline
+
+              // Try to extract the most relevant rate from usTariffHistory first
+              if (country.usTariffHistory && country.usTariffHistory.length > 0) {
+                   // Find the latest entry or the most representative one
+                   // Simple approach: find the entry with the highest rate mentioned in description/details
+                   let maxRateFound = 0;
+                   country.usTariffHistory.forEach(entry => {
+                       const desc = entry.description || '';
+                       const details = entry.details || '';
+                       const textToSearch = desc + ' ' + details;
+                       const rateMatch = textToSearch.match(/(\d{1,3})%/);
+                       if (rateMatch) {
+                            const rate = parseInt(rateMatch[1], 10);
+                            if (rate > maxRateFound) {
+                                maxRateFound = rate;
+                            }
+                       }
+                   });
+                   // If a rate > baseline was found in history, use it.
+                   // Otherwise, stick to baseline unless specific code logic overrides.
+                    if (maxRateFound > 10) { 
+                       usTariffRate = maxRateFound;
+                   } 
+                   // We might still need specific overrides for codes if history is ambiguous
+              }
+
+              // Fallback/Override logic based on country code (using latest verified rates)
+              switch (country.code) {
+                  case 'CN':
+                      usTariffRate = 125; // Highest priority override
+                      break;
+                  case 'CA':
+                       // Search results suggested 25%, history mentions 25% or 30%
+                      usTariffRate = 25; // Use 25% based on latest check
+                      break;
+                  case 'MX':
+                       // Search results suggested 25%
+                      usTariffRate = 25; 
+                      break;
+                  case 'EU':
+                       // Search results suggested 25%
+                      usTariffRate = 25; 
+                      break;
+                   case 'JP':
+                       // Search results suggested 24%
+                      usTariffRate = 24; 
+                      break;
+                  case 'IN':
+                       // Search results suggested 26%
+                      usTariffRate = 26;
+                      break;
+                  // No default needed as baseline is set initially
+              }
+              
+              // Return a new object structure suitable for the chart
+              return {
+                  code: country.code,
+                  name: country.name,
+                  usTariffRate: usTariffRate, // The rate US imposes ON this country
+                  originalData: country // Keep reference if needed for clicks etc.
+              };
+          });
+          
+      // Sort by the US tariff rate, descending
+      usTariffsOnCountries.sort((a, b) => b.usTariffRate - a.usTariffRate);
+      
+      return usTariffsOnCountries;
+  }
+  
+  /**
    * 绘制图表
    */
   drawChart() {
-    if (!this.data || !this.sortedCountries) {
-      console.error('图表数据未加载');
+    if (!this.data || !this.processedChartData) {
+      console.error('图表数据未加载或处理');
       return;
     }
     
-    // 过滤显示的国家数量
-    const visibleCountries = this.sortedCountries.slice(0, 10);
+    // 过滤显示的国家数量 (use processed data)
+    const visibleCountries = this.processedChartData.slice(0, 10);
     
     // 创建X比例尺
     this.xScale = d3.scaleBand()
@@ -137,9 +216,9 @@ class TariffBarChart {
       .range([0, this.innerWidth])
       .padding(0.2);
       
-    // 创建Y比例尺
+    // 创建Y比例尺 (use usTariffRate)
     this.yScale = d3.scaleLinear()
-      .domain([0, d3.max(visibleCountries, d => d.tariffRate) * 1.1])
+      .domain([0, d3.max(visibleCountries, d => d.usTariffRate) * 1.1])
       .range([this.innerHeight, 0]);
       
     // 绘制X轴
@@ -171,10 +250,10 @@ class TariffBarChart {
       .append('rect')
       .attr('class', 'bar')
       .attr('x', d => this.xScale(d.code))
-      .attr('y', d => this.yScale(d.tariffRate))
+      .attr('y', d => this.yScale(d.usTariffRate))
       .attr('width', this.xScale.bandwidth())
-      .attr('height', d => this.innerHeight - this.yScale(d.tariffRate))
-      .attr('fill', d => this.colorScale(d.tariffRate))
+      .attr('height', d => this.innerHeight - this.yScale(d.usTariffRate))
+      .attr('fill', d => this.colorScale(d.usTariffRate))
       .attr('stroke', '#fff')
       .attr('stroke-width', 1)
       .on('mouseover', this.handleMouseOver.bind(this))
@@ -189,32 +268,17 @@ class TariffBarChart {
       .append('text')
       .attr('class', 'bar-label')
       .attr('x', d => this.xScale(d.code) + this.xScale.bandwidth() / 2)
-      .attr('y', d => this.yScale(d.tariffRate) - 5)
+      .attr('y', d => this.yScale(d.usTariffRate) - 5)
       .attr('text-anchor', 'middle')
       .attr('font-size', '10px')
       .attr('font-weight', 'bold')
-      .text(d => d.tariffRate + '%');
+      .text(d => d.usTariffRate + '%');
       
-    // 添加全球平均线
-    const avgTariff = this.data.summary.averageTariff;
-    
-    this.chartGroup.append('line')
-      .attr('class', 'avg-line')
-      .attr('x1', 0)
-      .attr('y1', this.yScale(avgTariff))
-      .attr('x2', this.innerWidth)
-      .attr('y2', this.yScale(avgTariff))
-      .attr('stroke', '#333')
-      .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '5,5');
-      
-    this.chartGroup.append('text')
-      .attr('class', 'avg-line-label')
-      .attr('x', this.innerWidth - 5)
-      .attr('y', this.yScale(avgTariff) - 5)
-      .attr('text-anchor', 'end')
-      .attr('font-size', '10px')
-      .text(`全球平均: ${avgTariff}%`);
+    // 添加全球平均线 (This average might be less relevant now, consider removing or changing)
+    // const avgTariff = this.data.summary.averageTariff; 
+    // Temporarily removing the average line as it represents something different
+     this.chartGroup.selectAll('.avg-line').remove();
+     this.chartGroup.selectAll('.avg-line-label').remove();
   }
   
   /**
@@ -233,11 +297,11 @@ class TariffBarChart {
       .duration(200)
       .style('opacity', 0.9);
       
-    // 设置提示框内容
+    // 设置提示框内容 (**MODIFIED**)
     this.tooltip.html(`
       <div style="font-weight: bold; margin-bottom: 5px;">${d.name}</div>
-      <div>关税率: ${d.tariffRate}%</div>
-      ${this.getResponseHtml(d.response)}
+      <div>美国对其关税率: ${d.usTariffRate}%</div>
+      ${this.getResponseHtml(d.originalData.response)} 
     `);
   }
   
@@ -270,11 +334,11 @@ class TariffBarChart {
   /**
    * 处理点击事件
    * @param {Event} event 事件对象
-   * @param {Object} d 数据对象
+   * @param {Object} d 数据对象 (processed chart data)
    */
   handleClick(event, d) {
-    if (this.onBarClick) {
-      this.onBarClick(d);
+    if (this.onBarClick && d.originalData) {
+      this.onBarClick(d.originalData); // Pass the original country data object
     }
   }
   
@@ -309,10 +373,9 @@ class TariffBarChart {
   updateData(newData) {
     this.data = newData;
     
-    // 提取并排序国家数据
-    this.sortedCountries = [...this.data.countries]
-      .sort((a, b) => b.tariffRate - a.tariffRate);
-      
+    // 提取并排序国家数据 - **MODIFIED LOGIC**
+    this.processedChartData = this.processDataForChart(this.data.countries);
+    
     // 清除现有图表元素
     this.chartGroup.selectAll('.bar').remove();
     this.chartGroup.selectAll('.bar-label').remove();
@@ -329,22 +392,22 @@ class TariffBarChart {
    * @param {boolean} ascending 是否升序
    */
   updateSort(sortBy = 'tariffRate', ascending = false) {
-    if (!this.data || !this.sortedCountries) return;
-    
-    // 排序国家数据
-    this.sortedCountries.sort((a, b) => {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
-      
-      if (ascending) {
-        return aValue - bValue;
-      } else {
-        return bValue - aValue;
-      }
+     // **MODIFIED LOGIC** - Sort processedChartData based on usTariffRate
+    if (!this.processedChartData) return;
+
+    const direction = ascending ? 1 : -1;
+    this.processedChartData.sort((a, b) => {
+       // Assuming sorting is primarily by the displayed rate (usTariffRate)
+       const valA = a.usTariffRate;
+       const valB = b.usTariffRate;
+       
+       if (valA < valB) return -1 * direction;
+       if (valA > valB) return 1 * direction;
+       // Secondary sort by name if rates are equal
+       return a.name.localeCompare(b.name);
     });
     
-    // 更新图表
-    this.updateData(this.data);
+    this.drawChart(); // Redraw after sorting
   }
   
   /**

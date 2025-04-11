@@ -916,12 +916,160 @@
         const container = document.getElementById('trade-volume-card-content'); 
         if (!container) return;
         
-        // Based on search results, add descriptive text
+        // 使用用户提供的数据，采用结构化和样式精细的布局
         container.innerHTML = `
-            <div class="text-sm text-gray-600 space-y-2">
-                <p>根据公开分析，2024年中美双边贸易额较前一年有所增长（约3.7%），但美国自华进口额微降，显示关税对贸易结构产生影响。</p>
-                <p>随着2025年关税政策的延续甚至升级预期，双边贸易额可能面临进一步压力，供应链调整趋势或将持续。</p>
-                <p class="text-xs text-gray-400 mt-2">注：实时、详细的贸易额图表需要专门的数据源集成。</p>
+            <div class="text-sm text-gray-700">
+                <h6 class="font-semibold text-gray-700 mb-3">2022-2024年美国与主要贸易伙伴贸易数据概览</h6>
+                
+                <!-- 表格部分 - 采用精细边框和响应式设计 -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-gray-200">年份</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-gray-200">地区</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-gray-200">出口额<br/>(亿美元)</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-gray-200">进口额<br/>(亿美元)</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-gray-200">贸易总额<br/>(亿美元)</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-gray-200">贸易差额<br/>(亿美元)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 text-xs">
+                            <!-- 2022年数据 -->
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 font-medium text-gray-900 align-middle" rowspan="4">2022</td>
+                                <td class="px-3 py-2 text-gray-700">美洲<sup>2</sup></td>
+                                <td class="px-3 py-2 text-right text-gray-700">9,086.0</td>
+                                <td class="px-3 py-2 text-right text-gray-700">10,386.1</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">19,472.1</td>
+                                <td class="px-3 py-2 text-right text-red-600">-1,300.1</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-700">欧盟</td>
+                                <td class="px-3 py-2 text-right text-gray-700">3,502.6</td>
+                                <td class="px-3 py-2 text-right text-gray-700">5,530.98</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">9,033.58</td>
+                                <td class="px-3 py-2 text-right text-red-600">-2,028.34</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100 bg-blue-50">
+                                <td class="px-3 py-2 text-blue-800 font-medium">中国</td>
+                                <td class="px-3 py-2 text-right text-blue-800">1,541.3</td>
+                                <td class="px-3 py-2 text-right text-blue-800">5,362.6</td>
+                                <td class="px-3 py-2 text-right font-medium text-blue-800">6,903.9</td>
+                                <td class="px-3 py-2 text-right text-red-600 font-medium">-3,821.3</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-700">亚太地区<sup>3</sup></td>
+                                <td class="px-3 py-2 text-right text-gray-700">4,821.2</td>
+                                <td class="px-3 py-2 text-right text-gray-700">8,986.7</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">13,807.9</td>
+                                <td class="px-3 py-2 text-right text-red-600">-4,165.4</td>
+                            </tr>
+                            
+                            <!-- 2023年数据 -->
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 font-medium text-gray-900 align-middle" rowspan="4">2023</td>
+                                <td class="px-3 py-2 text-gray-700">美洲</td>
+                                <td class="px-3 py-2 text-right text-gray-700">8,767.5</td>
+                                <td class="px-3 py-2 text-right text-gray-700">10,391.0</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">19,158.5</td>
+                                <td class="px-3 py-2 text-right text-red-600">-1,623.5</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-700">欧盟</td>
+                                <td class="px-3 py-2 text-right text-gray-700">3,676.3</td>
+                                <td class="px-3 py-2 text-right text-gray-700">5,763.1</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">9,439.4</td>
+                                <td class="px-3 py-2 text-right text-red-600">-2,086.9</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100 bg-blue-50">
+                                <td class="px-3 py-2 text-blue-800 font-medium">中国</td>
+                                <td class="px-3 py-2 text-right text-blue-800">1,477.8</td>
+                                <td class="px-3 py-2 text-right text-blue-800">4,268.9</td>
+                                <td class="px-3 py-2 text-right font-medium text-blue-800">5,746.7</td>
+                                <td class="px-3 py-2 text-right text-red-600 font-medium">-2,791.1</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-700">亚太地区</td>
+                                <td class="px-3 py-2 text-right text-gray-700">4,683.5</td>
+                                <td class="px-3 py-2 text-right text-gray-700">8,495.6</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">13,179.1</td>
+                                <td class="px-3 py-2 text-right text-red-600">-3,812.2</td>
+                            </tr>
+                            
+                            <!-- 2024年数据 -->
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 font-medium text-gray-900 align-middle" rowspan="4">2024</td>
+                                <td class="px-3 py-2 text-gray-700">美洲</td>
+                                <td class="px-3 py-2 text-right text-gray-700">8,895.5</td>
+                                <td class="px-3 py-2 text-right text-gray-700">10,773.6</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">19,669.1</td>
+                                <td class="px-3 py-2 text-right text-red-600">-1,878.1</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-700">欧盟</td>
+                                <td class="px-3 py-2 text-right text-gray-700">3,701.9</td>
+                                <td class="px-3 py-2 text-right text-gray-700">6,057.6</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">9,759.5</td>
+                                <td class="px-3 py-2 text-right text-red-600">-2,355.7</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100 bg-blue-50">
+                                <td class="px-3 py-2 text-blue-800 font-medium">中国</td>
+                                <td class="px-3 py-2 text-right text-blue-800">1,435.5</td>
+                                <td class="px-3 py-2 text-right text-blue-800">4,389.5</td>
+                                <td class="px-3 py-2 text-right font-medium text-blue-800">5,825.0</td>
+                                <td class="px-3 py-2 text-right text-red-600 font-medium">-2,954.0</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-700">亚太地区</td>
+                                <td class="px-3 py-2 text-right text-gray-700">4,964.8</td>
+                                <td class="px-3 py-2 text-right text-gray-700">9,407.4</td>
+                                <td class="px-3 py-2 text-right font-medium text-gray-900">14,372.2</td>
+                                <td class="px-3 py-2 text-right text-red-600">-4,442.6</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 注释说明部分 -->
+                <div class="text-xs text-gray-500 mt-2 space-y-1">
+                    <p><sup>1</sup> 贸易差额=出口额-进口额，正值为顺差，负值为逆差。</p>
+                    <p><sup>2</sup> "美洲"包括北美（加拿大、墨西哥）和中南美洲主要贸易国（如巴西等）。</p>
+                    <p><sup>3</sup> "亚太地区"此处不含中国，包括日本、韩国、印度、澳大利亚等亚太主要经济体。</p>
+                </div>
+                
+                <!-- 贸易趋势分析部分 -->
+                <div class="mt-4 pt-3 border-t border-gray-200">
+                    <h6 class="font-semibold text-gray-700 mb-2">贸易趋势分析</h6>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-gray-50 p-3 rounded-lg border-l-4 border-blue-400">
+                            <p class="text-xs leading-relaxed text-gray-700">
+                                <span class="font-semibold text-blue-700">贸易格局变化：</span> 
+                                2022-2024年数据显示美国贸易伙伴格局调整显著。到2023年，墨西哥超越中国成为美国最大贸易伙伴，2024年墨西哥与加拿大分别位居美国第一、第二大货物贸易国，中国降至第三。美国与欧盟贸易逐年温和增长（2022年约9,034亿美元增至2024年约9,760亿美元）。与中国贸易在2023年显著收缩（从2022年的6,904亿美元降至5,747亿美元），2024年略有回升但仍低于2022年水平。
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-3 rounded-lg border-l-4 border-red-400">
+                            <p class="text-xs leading-relaxed text-gray-700">
+                                <span class="font-semibold text-red-700">贸易逆差来源：</span> 
+                                美国货物贸易逆差主要来自亚洲。中国是最大逆差来源国，2022年对华逆差高达3,821亿美元，2023年缩减至2,791亿美元，2024年再度扩大至2,954亿美元。亚太其他经济体（不含中国）对美贸易顺差也在扩大，2024年美国对该地区逆差约4,443亿美元，较2022年增长约6%。欧盟是另一重要逆差来源，三年间对欧逆差从2,028亿美元增至2,356亿美元。
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-3 rounded-lg border-l-4 border-green-400">
+                            <p class="text-xs leading-relaxed text-gray-700">
+                                <span class="font-semibold text-green-700">供应链调整：</span> 
+                                数据反映出美国贸易的重要趋势转变：北美邻国重要性上升，对中国依赖度下降。这与美国供应链"近岸化"战略及持续的美中经贸摩擦背景相符。美国从亚太其他国家（如越南、印度、韩国等）的进口增长，在一定程度上填补了自中国进口的减少，促使亚洲内部贸易顺差来源多元化。2025年随着新一轮关税政策实施，这种调整趋势可能加速。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 数据来源 -->
+                <p class="text-xs text-gray-400 mt-4 pt-2 border-t border-gray-200">
+                    数据来源：美国人口普查局国际贸易数据库 (<a href="https://www.census.gov/foreign-trade/balance/c0010.html" target="_blank" class="text-blue-400 hover:text-blue-600">International Trade</a>)
+                </p>
             </div>
         `; 
     }
@@ -930,72 +1078,282 @@
         const container = document.getElementById('sector-impact-card-content'); 
         if (!container) return;
        
-        // Based on search results, list impacted sectors
+        // 将内容拆分为两个标签页，添加标签切换功能
         container.innerHTML = `
-            <div class="text-sm text-gray-600 space-y-2">
-                <p>受关税政策影响较大的主要行业包括（根据不同分析来源）：</p>
-                <ul class="list-disc list-inside text-xs space-y-1 pl-2">
-                    <li><strong>中国出口：</strong> 机械设备、电子产品、电器设备、纺织服装、家具玩具等劳动密集型产品，以及钢铁、铝材、电动汽车、太阳能电池、半导体等被针对性加税的行业。</li>
-                    <li><strong>美国进口/消费：</strong> 可能导致依赖中国进口的消费品价格上涨。</li>
-                </ul>
-                 <p class="text-xs text-gray-400 mt-2">注：具体影响程度因产品和企业而异，需更深入分析。</p>
+            <div class="text-sm text-gray-700">
+                <!-- 标签页导航 -->
+                <div class="border-b border-gray-200 mb-4">
+                    <nav class="-mb-px flex space-x-6" aria-label="行业分析标签页">
+                        <button id="sector-tab-negative" class="sector-tab whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-red-500 text-red-600" aria-current="page">
+                            受关税负面影响的行业
+                        </button>
+                        <button id="sector-tab-positive" class="sector-tab whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                            关税保护受益的行业
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- 负面影响行业内容区域 -->
+                <div id="sector-panel-negative" class="sector-panel">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- 汽车和电动车行业 -->
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-red-800">汽车和电动车行业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-red-700">2024-2025政策：</strong> 美国对中国电动汽车征收<strong>100%</strong>关税，电池及零部件25%，半导体和关键矿物50%。
+                                <br><br>
+                                <strong class="text-red-700">企业案例：</strong> <span class="font-semibold">福特汽车</span>请求降低电池阳极材料(人造石墨)关税，称"几乎完全"依赖中国供应。<span class="font-semibold">通用汽车</span>表示对中国制造的别克昂科威征收25%关税将使每辆车成本增加约8,750美元，迫使停售该车型。
+                                <br><br>
+                                <strong class="text-red-700">整体影响：</strong> 制造成本上升，供应链被迫调整，厂商利润空间收窄，部分车企加速供应链本土化或"近岸化"以应对挑战。
+                            </p>
+                        </div>
+
+                        <!-- 电子科技和制造业 -->
+                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-yellow-800">电子科技和制造业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-yellow-700">2025政策维持：</strong> 对数百亿美元中国输美电子产品维持7.5%-25%关税，2025年对部分中国半导体产品加征50%关税。
+                                <br><br>
+                                <strong class="text-yellow-700">产品范围：</strong> 智能手机、电脑、家电等消费电子产品及零部件、工业电子设备，半导体材料等先进技术领域。
+                                <br><br>
+                                <strong class="text-yellow-700">整体影响：</strong> 国内电子产品制造成本上升，企业或承担增高成本料或传递给消费者，导致下游需求可能受抑。半导体行业产业链短期效率降低但长期促进多元化。
+                            </p>
+                        </div>
+
+                        <!-- 基础设施及物流行业 -->
+                        <div class="p-3 bg-purple-50 border border-purple-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-purple-800">基础设施及物流行业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-purple-700">2025新关税：</strong> 对大型港口起重机(岸桥式起重机)加征25%关税，这类设备几乎全部依赖中国制造。
+                                <br><br>
+                                <strong class="text-purple-700">实例影响：</strong> 纽约新泽西港口表示，每台中国起重机成本将因此增加约450万美元，对港口有限资金形成"重大压力"。多位参议员因此呼吁对已下单的中国起重机给予豁免。
+                                <br><br>
+                                <strong class="text-purple-700">行业后果：</strong> 基础设施更新步伐可能放缓，物流成本上升加一步传导至其他行业，降低供应链整体效率。
+                            </p>
+                        </div>
+
+                        <!-- 医疗与日用消费品行业 -->
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-blue-800">医疗与日用消费品行业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-blue-700">2025关税扩展：</strong> 对一次性注射器等医疗用品征收50%关税，并维持对生活消费品(服装、家具、玩具)的关税。
+                                <br><br>
+                                <strong class="text-blue-700">关键担忧：</strong> 医疗行业警告，高关税可能导致基本医疗用品短缺，如新生儿喂养用注射器等，影响患者护理质量。
+                                <br><br>
+                                <strong class="text-blue-700">消费品影响：</strong> 大型零售商和进口商承担更高库存成本，部分已开始调整供应链，但短期内难以完全替代中国产能，消费者将面临价格上涨。
+                            </p>
+                        </div>
+
+                        <!-- 农业 -->
+                        <div class="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-green-800">农业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-green-700">中国反制：</strong> 2025年初针对美国最新一轮加税，中国对价值约210亿美元的美国农产品加征10%-15%关税。
+                                <br><br>
+                                <strong class="text-green-700">大豆出口受创：</strong> 2024年中国仍是美国大豆最大出口市场，进口额高达128亿美元，约占美国大豆出口的一半。2025年3月，中国以检测到真菌为由暂停了三家美国大豆出口商的进口许可。
+                                <br><br>
+                                <strong class="text-green-700">数据反映：</strong> 美国农产品对华出口在2024年下降2.9%，2025年初继续下滑。除关税外，中国还通过延迟检验等非关税手段限制美国农产品进口。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保护受益行业内容区域 -->
+                <div id="sector-panel-positive" class="sector-panel hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- 钢铁和铝业 -->
+                        <div class="p-3 bg-gray-50 border border-gray-300 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-gray-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-gray-800">钢铁和铝业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-gray-700">2025年加码：</strong> 美国计划将原本对部分中国钢铁产品7.5%的税率上调至25%，并扩大适用范围。
+                                <br><br>
+                                <strong class="text-gray-700">企业反应：</strong> 在美经营不锈钢厂的芬兰公司<span class="font-semibold">Outokumpu</span>公开支持提高关税，并主张将关税扩展至所有中国熔炼的钢铁产品，包括经由第三国加工后再出口的钢材。
+                                <br><br>
+                                <strong class="text-gray-700">行业获益：</strong> 美国钢铁厂获得更公平的竞争环境，本土钢材价格和利润率提高，企业得以扩大生产、重启部分闲置产能并增加就业。
+                            </p>
+                        </div>
+
+                        <!-- 太阳能等清洁能源制造 -->
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-amber-800">太阳能等清洁能源制造</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-amber-700">2025年重磅政策：</strong> 2025年2月美国商务部初裁认定东南亚四国(马来西亚、越南、泰国、柬埔寨)光伏产品存在倾销，初步税率从21%高至271%不等。
+                                <br><br>
+                                <strong class="text-amber-700">公司案例：</strong> <span class="font-semibold">First Solar</span>作为请愿方之一，在政策保护下业绩显著提升。预计2025年营收将增至53~58亿美元(高于2024年的43亿美元)，毛利率从2024年约30%跃升至47%。
+                                <br><br>
+                                <strong class="text-amber-700">长期价值：</strong> 高关税与《通胀削减法案》(IRA)补贴双管齐下，已吸引众多企业在美投资建厂，如<span class="font-semibold">韩国韩华Qcells</span>、<span class="font-semibold">美国First Solar</span>等。虽短期内抬高安装成本，但长期将培育完整的国内供应链。
+                            </p>
+                        </div>
+
+                        <!-- 其他制造业 -->
+                        <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-indigo-800">其他制造业</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-indigo-700">2025年政策趋势：</strong> 美国正审视反倾销和反补贴(AD/CVD)政策以更主动发起调查，打击低价倾销，预计将惠及机床、化工、家具等行业。
+                                <br><br>
+                                <strong class="text-indigo-700">家电领域：</strong> 美国对大型洗衣机及其零件征收保障关税，使本土家电企业(如<span class="font-semibold">惠而浦</span>)市场份额提升。
+                                <br><br>
+                                <strong class="text-indigo-700">制造业回流：</strong> 据白宫报告，美国正寻求通过强化原产地规则和减少非市场经济体成分来促使制造业回流，这些政策将长期利好国内制造型企业。
+                            </p>
+                        </div>
+
+                        <!-- 能源和农业领域 -->
+                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-md">
+                            <div class="flex items-center mb-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+                                <h6 class="text-sm font-semibold text-emerald-800">能源和农业出口</h6>
+                            </div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                <strong class="text-emerald-700">能源领域间接受益：</strong> 美国对俄罗斯石油的进口限制(虽属制裁而非关税)提高了俄油进入市场难度，变相支持北美原油生产者在国内炼厂的市场份额。
+                                <br><br>
+                                <strong class="text-emerald-700">农业贸易协定：</strong> 美国通过贸易协定争取农业出口机会，如在美国-墨西哥-加拿大协议(USMCA)实施中，寻求扩大对加拿大乳制品的市场准入。
+                                <br><br>
+                                <strong class="text-emerald-700">市场多元化：</strong> 尽管中美对抗给部分农户造成损失，美国也通过多元化市场和政府支援来稳住农业基本盘，2025年对东南亚、非洲等地的农产品出口有小幅提升。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 企业应对策略 -->
+                <div class="mt-4 pt-3 border-t border-gray-200">
+                    <h6 class="text-sm font-semibold text-gray-700 mb-2">企业应对策略</h6>
+                    <div class="p-3 bg-white border border-gray-200 rounded-md">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="p-2 border-l-2 border-blue-400">
+                                <h6 class="text-xs font-semibold text-blue-800 mb-1">供应链重组</h6>
+                                <p class="text-xs text-gray-600">通过"近岸化"减少依赖，如<span class="font-semibold">特斯拉</span>在美国建设锂电池材料工厂以降低地缘风险</p>
+                            </div>
+                            <div class="p-2 border-l-2 border-red-400">
+                                <h6 class="text-xs font-semibold text-red-800 mb-1">申请关税豁免</h6>
+                                <p class="text-xs text-gray-600">众多企业积极向USTR申请特定产品类别的关税豁免以降低成本</p>
+                            </div>
+                            <div class="p-2 border-l-2 border-green-400">
+                                <h6 class="text-xs font-semibold text-green-800 mb-1">市场多元化</h6>
+                                <p class="text-xs text-gray-600">开发新市场分散风险，如农产品出口转向东南亚、非洲等地区</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-400 mt-4 pt-2 border-t border-gray-200">
+                    注：本分析基于2025年4月最新政策数据。受关税和贸易政策影响，行业状况可能快速变化，具体企业应对策略各异。
+                </p>
             </div>
+            
+            <!-- 添加标签页切换脚本 -->
+            <script>
+                // REMOVE: document.addEventListener('DOMContentLoaded', function() {
+                    const sectorTabs = document.querySelectorAll('.sector-tab');
+                    const sectorPanels = document.querySelectorAll('.sector-panel');
+                    
+                    sectorTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            // 移除所有标签页的激活状态
+                            sectorTabs.forEach(t => {
+                                t.classList.remove('border-red-500', 'text-red-600', 'border-green-500', 'text-green-600');
+                                t.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                                t.removeAttribute('aria-current');
+                            });
+                            
+                            // 隐藏所有内容面板
+                            sectorPanels.forEach(panel => {
+                                panel.classList.add('hidden');
+                            });
+                            
+                            // 激活当前标签页
+                            tab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                            tab.setAttribute('aria-current', 'page');
+                            const panelId = tab.id.replace('sector-tab-', 'sector-panel-');
+                            if (tab.id === 'sector-tab-negative') {
+                                tab.classList.add('border-red-500', 'text-red-600');
+                            } else {
+                                tab.classList.add('border-green-500', 'text-green-600');
+                            }
+                            
+                            // 显示对应的内容面板
+                            const targetPanel = document.getElementById(panelId);
+                            if (targetPanel) {
+                               targetPanel.classList.remove('hidden');
+                            } else {
+                               console.error("Target panel not found:", panelId);
+                            }
+                        });
+                    });
+                // REMOVE: });
+            <\/script> // Keep escaped closing tag
         `;
     }
     
     async function loadStockMarketData() {
         const container = document.getElementById('stock-market-card-content'); 
-        const apiKey = 'UNKJ4TNA8P57QQRT'; 
-        // Use representative ETFs for indices where direct index symbols failed
+        // Use local file paths instead of symbols
         const symbols = {
-            'S&P 500 (SPY)': 'SPY',
-            'Nasdaq (QQQ)': 'QQQ',
-            'DAX (EXS1.DE)': 'EXS1.DE',      // DAX ETF (XETRA)
-            'China A50 (ASHR)': 'ASHR',   // CSI 300 ETF (US Listed)
-            'Japan (EWJ)': 'EWJ'         // MSCI Japan ETF (US Listed)
+            'S&P 500 (SPY)': 'data/stock/SPY.json',
+            'Nasdaq (QQQ)': 'data/stock/QQQ.json',
+            'DAX (EXS1.DE)': 'data/stock/EXS1.DE.json', // Ensure file exists
+            'China A50 (ASHR)': 'data/stock/ASHR.json',
+            'Japan (EWJ)': 'data/stock/EWJ.json'
         };
-        const outputSize = 'compact'; 
-        const functionToUse = 'TIME_SERIES_DAILY';
+        // REMOVED: const outputSize = 'compact'; 
+        // REMOVED: const functionToUse = 'TIME_SERIES_DAILY';
 
         if (!container) return;
-        container.innerHTML = '<p class="text-gray-400 text-sm text-center">加载股市数据中...</p>';
+        container.innerHTML = '<p class="text-gray-400 text-sm text-center">加载本地股市数据中...</p>';
 
         try {
-            const fetchPromises = Object.entries(symbols).map(([name, symbol]) => 
-                fetch(`https://www.alphavantage.co/query?function=${functionToUse}&symbol=${symbol}&outputsize=${outputSize}&apikey=${apiKey}`)
+            // Fetch from local files
+            const fetchPromises = Object.entries(symbols).map(([name, filePath]) => 
+                fetch(filePath) // Fetch local JSON file
                     .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error for ${symbol}! status: ${response.status}`);
-                        return response.json();
+                        if (!response.ok) throw new Error(`无法加载本地文件 ${filePath}! status: ${response.status}`);
+                        return response.json(); // Parse JSON directly
                     })
-                    .then(data => {
-                        // console.log(`Raw Alpha Vantage Response (${symbol} - ${functionToUse}):`, JSON.stringify(data, null, 2));
+                    .then(timeSeries => { // Assume the JSON file *contains* the time series data object
+                        // console.log(`Raw Local Data (${filePath}):`, JSON.stringify(timeSeries, null, 2));
 
-                        if (data.Note && data.Note.includes('API call frequency')) {
-                            console.warn(`Alpha Vantage API call frequency limit reached for ${symbol}.`);
-                            return { name, data: null, error: 'API频率限制' };
-                        }
-                        const timeSeriesKey = 'Time Series (Daily)'; 
-                        if (data['Error Message']) { 
-                             console.warn(`API Error for symbol ${symbol}: ${data['Error Message']}`);
-                             // Treat specific error messages differently if needed, otherwise show the message
-                             return { name, data: null, error: data['Error Message'] };
-                         } else if (!data[timeSeriesKey]) { 
-                            console.error(`Alpha Vantage error for ${symbol}: Expected key \'${timeSeriesKey}\' not found.`);
-                            return { name, data: null, error: `数据格式无效或缺失key: ${timeSeriesKey}` };
-                        }
+                        if (!timeSeries || typeof timeSeries !== 'object') {
+                             console.error(`本地文件 ${filePath} 数据格式无效或为空。`);
+                             return { name, data: null, error: `本地文件数据格式无效: ${filePath}` };
+                         }
                         
-                        const timeSeries = data[timeSeriesKey];
+                        // Process the timeSeries data directly
                         const processedData = Object.entries(timeSeries)
                             .map(([date, values]) => ({
                                 date: new Date(date),
-                                value: parseFloat(values['4. close'])
+                                // Assuming the structure within the JSON matches the API: keys '1. open', '4. close' etc.
+                                value: parseFloat(values['4. close']) 
                             }))
                             .sort((a, b) => a.date - b.date); 
                         return { name, data: processedData, error: null }; 
                     })
                     .catch(error => {
-                        console.error(`Fetch failed for ${symbol}:`, error);
-                        return { name, data: null, error: `请求失败 (${error.message})` }; 
+                        console.error(`加载本地文件 ${filePath} 失败:`, error);
+                        // Update error message to reflect local file fetching
+                        return { name, data: null, error: `加载文件失败 (${filePath}: ${error.message})` }; 
                     })
             );
 

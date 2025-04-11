@@ -148,19 +148,18 @@ class TariffWorldMap {
           .attr('data-country-code3', d => d.id) // Store alpha-3 code (e.g., 'USA')
           .attr('data-country-code2', d => d.properties.iso_a2_eh || d.properties.iso_a2) // Store alpha-2 code (e.g., 'US')
           .attr('fill', d => {
-              // **MODIFIED FILL LOGIC**
               const countryCode3 = d.id;
-              const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
+
               if (countryCode3 === 'USA') {
                   return '#cbd5e0'; // Neutral color (Tailwind gray-300) for the US itself
               }
-              
-              // 检查是否为欧盟成员国
-              if (this.isEUMember(countryCode2)) {
+
+              // 检查是否为欧盟成员国 (使用 ISO A3)
+              if (this.isEUMember(countryCode3)) {
                   // 对欧盟成员国使用欧盟的关税率
                   return this.colorScale(this.getUsTariffOnCountry(this.euData));
               }
-              
+
               const country = countryTariffMap[countryCode3];
               if (!country) {
                   return '#f7fafc'; // Very light gray (Tailwind gray-100) for countries with no data
@@ -182,19 +181,18 @@ class TariffWorldMap {
           .on('click', this.handleClick.bind(this)),
         update => update // How to update existing paths
           .attr('fill', d => {
-              // **MODIFIED FILL LOGIC for UPDATE**
               const countryCode3 = d.id;
-              const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
+
               if (countryCode3 === 'USA') {
                   return '#cbd5e0'; // Neutral color for US
               }
-              
-              // 检查是否为欧盟成员国
-              if (this.isEUMember(countryCode2)) {
+
+              // 检查是否为欧盟成员国 (使用 ISO A3)
+              if (this.isEUMember(countryCode3)) {
                   // 对欧盟成员国使用欧盟的关税率
                   return this.colorScale(this.getUsTariffOnCountry(this.euData));
               }
-              
+
               const country = countryTariffMap[countryCode3];
               if (!country) {
                   return '#f7fafc'; // No data color
@@ -445,13 +443,12 @@ class TariffWorldMap {
   handleMouseOver(event, d) {
     d3.select(event.currentTarget).raise(); // Bring path to front
     const countryCode3 = d.id;
-    const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
-    const countryData = this.findCountryData(countryCode3); 
+    const countryData = this.findCountryData(countryCode3);
     
-    if (this.isEUMember(countryCode2)) {
+    if (this.isEUMember(countryCode3)) {
         this.handleEUInteraction(true); // Highlight all EU members
         // For EU tooltip, get the specific EU data object
-        const euDataObject = this.tariffData.countries.find(c => c.code === 'EU') || {}; 
+        const euDataObject = this.tariffData.countries.find(c => c.code === 'EU') || {};
         this.showTooltip(event, euDataObject); // Show EU data in tooltip
     } else {
         this.handleEUInteraction(false); // Ensure EU is not highlighted if hovering over non-EU
@@ -480,9 +477,9 @@ class TariffWorldMap {
    * @param {Event} event 鼠标事件
    */
   handleMouseOut(event) {
-    const countryCode2 = d3.select(event.currentTarget).attr('data-country-code2');
+    const countryCode3 = d3.select(event.currentTarget).attr('data-country-code3');
     
-    if (this.isEUMember(countryCode2)) {
+    if (this.isEUMember(countryCode3)) {
         this.handleEUInteraction(false); // Remove highlight from all EU members
     } else {
         // Only reset non-EU country style if EU wasn't highlighted
@@ -501,10 +498,9 @@ class TariffWorldMap {
   handleClick(event, d) {
     if (this.onCountryClick) {
       const countryCode3 = d.id;
-      const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
       let countryData;
 
-      if (this.isEUMember(countryCode2)) {
+      if (this.isEUMember(countryCode3)) {
           countryData = this.euData; // If clicked on an EU member, show EU details
       } else {
           countryData = this.findCountryData(countryCode3);
@@ -537,12 +533,12 @@ class TariffWorldMap {
   }
   
   /**
-   * Helper to check if a country code (ISO A2) is an EU member
-   * @param {string} code2 ISO A2 code
+   * Helper to check if a country code (ISO A3) is an EU member
+   * @param {string} code3 ISO A3 code
    * @returns {boolean}
    */
-  isEUMember(code2) {
-      return this.euData && this.euData.memberCountries && this.euData.memberCountries.includes(code2);
+  isEUMember(code3) {
+      return this.euData && this.euData.memberCountries && this.euData.memberCountries.includes(code3);
   }
   
   /**
@@ -552,8 +548,8 @@ class TariffWorldMap {
   handleEUInteraction(highlight) {
       if (!this.euData || !this.euData.memberCountries) return;
 
-      this.euData.memberCountries.forEach(memberCode => {
-          const countryLayer = this.countryGeoMap[memberCode];
+      this.euData.memberCountries.forEach(memberCode3 => {
+          const countryLayer = this.countryGeoMap[memberCode3];
           if (countryLayer) {
               d3.select(countryLayer)
                 .classed('highlighted-eu-member', highlight)
@@ -635,14 +631,13 @@ class TariffWorldMap {
       .duration(750)
       .attr('fill', d => {
         const countryCode3 = d.id;
-        const countryCode2 = d.properties.iso_a2_eh || d.properties.iso_a2;
-        
+
         if (countryCode3 === 'USA') {
           return '#cbd5e0';
         }
         
-        // 检查是否为欧盟成员国
-        if (this.isEUMember(countryCode2)) {
+        // 检查是否为欧盟成员国 (使用 ISO A3)
+        if (this.isEUMember(countryCode3)) {
           return this.colorScale(this.getUsTariffOnCountry(this.euData));
         }
         

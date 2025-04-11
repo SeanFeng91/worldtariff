@@ -218,7 +218,7 @@
     "latitude": 50.11,
     "isMajor": true,
     "impact": "美欧贸易关系紧张，可能影响跨大西洋贸易。",
-    "memberCountries": ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"],
+    "memberCountries": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
     "usTariffHistory": [
       {
         "date": "2024 (至2025年初)",

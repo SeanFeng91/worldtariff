@@ -9,7 +9,7 @@ import time
 # --- 配置 ---
 # 替换为你自己的 Alpha Vantage API Key
 # 你可以从 https://www.alphavantage.co/support/#api-key 获取免费的 API Key
-ALPHA_VANTAGE_API_KEY = 'YNA3PO0C4F52MUXO' # 强烈建议从环境变量或配置文件读取
+ALPHA_VANTAGE_API_KEY = 'SFQWOYE7LHWY8WMC' # 强烈建议从环境变量或配置文件读取
 
 # 需要获取数据的股票/ETF代码
 SYMBOLS = {

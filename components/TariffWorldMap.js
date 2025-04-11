@@ -16,7 +16,7 @@ class TariffWorldMap {
   constructor(config) {
     this.containerId = config.containerId || 'tariff-world-map';
     this.dataPath = config.dataPath || 'data/tariff_data.json';
-    this.geoJsonPath = config.geoJsonPath || 'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson';
+    this.geoJsonPath = config.geoJsonPath || 'data/world.geojson';
     this.width = config.width || 960;
     this.height = config.height || 500;
     this.margins = config.margins || { top: 20, right: 20, bottom: 60, left: 20 };
